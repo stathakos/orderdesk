@@ -1,0 +1,246 @@
+/* ============================================
+   PRINT STYLESHEET — kitchen ticket only
+   Import once in main.jsx:
+   import "./print.css"
+   ============================================ */
+ 
+/* ── Hidden on screen ── */
+#kitchen-ticket {
+  display: none;
+}
+ 
+/* ── Print mode ── */
+@media print {
+ 
+  /* Hide everything via visibility (more reliable than display:none) */
+  body * {
+    visibility: hidden !important;
+  }
+ 
+  /* Show only the ticket and all its children */
+  #kitchen-ticket,
+  #kitchen-ticket * {
+    visibility: visible !important;
+  }
+ 
+  /* Position ticket at top of page */
+  #kitchen-ticket {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+  }
+}
+ 
+/* ── Ticket styles ── */
+ 
+#kitchen-ticket {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 13px;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  padding: 12px;
+  color: #000;
+  background: #fff;
+}
+ 
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+ 
+.ticket-order-number {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+ 
+.ticket-time {
+  font-size: 11px;
+  color: #333;
+}
+ 
+.ticket-divider {
+  border-top: 1px dashed #000;
+  margin: 8px 0;
+}
+ 
+.ticket-order-type {
+  font-size: 16px;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: 2px;
+  margin: 6px 0;
+  padding: 4px;
+  border: 2px solid #000;
+  text-transform: uppercase;
+}
+ 
+.ticket-customer {
+  margin: 6px 0;
+}
+ 
+.ticket-customer-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+ 
+.ticket-customer-phone {
+  font-size: 12px;
+  color: #333;
+}
+ 
+.ticket-address {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 4px;
+  padding: 3px 0;
+  border-top: 1px dotted #999;
+}
+ 
+.ticket-items {
+  margin: 4px 0;
+}
+ 
+.ticket-item {
+  margin-bottom: 8px;
+}
+ 
+.ticket-item-main {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+ 
+.ticket-item-qty {
+  font-size: 15px;
+  font-weight: 900;
+  min-width: 28px;
+}
+ 
+.ticket-item-name {
+  font-size: 14px;
+  font-weight: 700;
+  flex: 1;
+}
+ 
+.ticket-item-price {
+  font-size: 12px;
+  color: #333;
+  text-align: right;
+}
+ 
+.ticket-customizations {
+  list-style: none;
+  margin: 2px 0 0 28px;
+  padding: 0;
+}
+ 
+.ticket-customizations li {
+  font-size: 12px;
+  color: #000;
+  font-style: italic;
+  line-height: 1.4;
+}
+ 
+.ticket-customizations li::before {
+  content: "→ ";
+  font-style: normal;
+}
+ 
+.ticket-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 900;
+  margin: 4px 0;
+  letter-spacing: 1px;
+}
+ 
+.ticket-notes {
+  font-size: 12px;
+  margin: 4px 0;
+  padding: 4px;
+  border: 1px dashed #000;
+}
+ 
+.ticket-footer {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-top: 6px;
+  color: #555;
+}
+
+.ticket-floor {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 3px;
+}
+
+.ticket-customer-notes {
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 3px;
+  color: #333;
+}
+
+.ticket-worker, .ticket-payment {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 3px 0;
+}
+
+.ticket-worker-phone {
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.ticket-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 6px 0;
+}
+
+.ticket-qr-label {
+  font-size: 11px;
+  color: #555;
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+/* ── Shift Summary print ── */
+@media print {
+  #shift-summary,
+  #shift-summary * {
+    visibility: visible !important;
+  }
+
+  #shift-summary {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
+
+@media print {
+  #barcodes-sheet,
+  #barcodes-sheet * {
+    visibility: visible !important;
+  }
+
+  #barcodes-sheet {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
