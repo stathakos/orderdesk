@@ -27,10 +27,13 @@ app = FastAPI(title="Restaurant Orders API")
 origins = [
     "http://localhost:5173",  # your React dev server
     "http://127.0.0.1:5173",
+    "http://192.168.1.36:5173",  # your machine's local IP
+    "http://localhost:4173",  # preview mode
 ]
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origin_regex=".*",  # allow everything
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
