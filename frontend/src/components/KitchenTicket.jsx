@@ -69,8 +69,8 @@ export default function KitchenTicket({ order, variant = "kitchen"  }) {
           </>
         )}
 
-        {/* Customer notes (allergies/preferences/communication details) */}
-        {order.customer.notes && (
+        {/* Customer notes delivery ticket only (entrance/access instructions) */}
+        {isDeliveryVariant && order.customer.notes && (
           <div className="ticket-customer-notes">
             ⚠️ {order.customer.notes}
           </div>
@@ -138,12 +138,12 @@ export default function KitchenTicket({ order, variant = "kitchen"  }) {
         </>
       )}
  
-      {/* Notes / description */}
-      {isDeliveryVariant && order.description && (
+      {/* Kitchen notes — kitchen ticket only (allergies, grill method, preferences) */}
+      {isKitchen && order.description && (
         <>
           <div className="ticket-divider" />
           <div className="ticket-notes">
-            <strong>NOTE:</strong> {order.description}
+            <strong>KITCHEN NOTE:</strong> {order.description}
           </div>
         </>
       )}

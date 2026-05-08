@@ -250,10 +250,11 @@ export default function OrderForm({
       {/* Description */}
       <div className="mb-3">
         <label className="form-label small fw-semibold">
-          Description <span className="fw-normal text-muted">(optional)</span>
+          Kitchen Notes <span className="fw-normal text-muted">(optional)</span>
         </label>
         <textarea
           className="form-control form-control-sm"
+          placeholder="Allergies, grill method, special prep..."
           rows={2}
           value={description}
           onChange={(e) => setDescription(e.target.value)}

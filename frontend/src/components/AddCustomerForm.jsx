@@ -151,12 +151,12 @@ export default function AddCustomerForm({ initialPhone, initialName, onClose, on
  
           <div className="mb-4">
             <label className="form-label small fw-semibold">
-              Notes <span className="fw-normal text-muted">(optional)</span>
+              Delivery Notes <span className="fw-normal text-muted">(optional)</span>
             </label>
             <input
               type="text"
               className="form-control"
-              placeholder="Allergies, preferences..."
+              placeholder="Entrance instructions, bell, call, access info..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
