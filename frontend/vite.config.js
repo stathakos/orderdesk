@@ -9,7 +9,6 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
-      // includeAssets: ['favicon.ico'],
       manifest: {
         name: 'OrderDesk',
         short_name: 'OrderDesk',
