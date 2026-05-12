@@ -1,16 +1,14 @@
 #!/bin/bash
-echo "🍕 Starting Restaurant App Frontend..."
+echo "🍕 Starting OrderDesk Frontend..."
 cd "$(dirname "$0")/frontend"
 
-# Install dependencies if needed
-if [ ! -d "node_modules" ]; then
-    echo "Installing node modules..."
-    npm install
+# Build if dist doesn't exist OR if source files are newer than dist
+if [ ! -d "dist" ] || [ "$(find src -newer dist -name '*.jsx' -o -name '*.js' -o -name '*.css' | head -1)" != "" ]; then
+    echo "Changes detected — rebuilding frontend..."
+    npm run build
+else
+    echo "No changes detected — skipping build..."
 fi
-
-# Build and preview on all interfaces
-echo "Building frontend..."
-npm run build
 
 echo "Frontend starting on http://0.0.0.0:4173"
 npm run preview -- --host 0.0.0.0 --port 4173
