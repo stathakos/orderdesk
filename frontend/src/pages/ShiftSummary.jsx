@@ -21,7 +21,7 @@ const PAYMENT_LABEL = {
 };
 
 export default function ShiftSummary() {
-  useWatermark("/icons/summary.png");
+  useWatermark("/icons/euro.png");
 
   // const [workers, setWorkers] = useState([]);
   const [summaries, setSummaries] = useState([]);

@@ -39,7 +39,7 @@ const STATUS_BADGE = {
 };
 
 export default function OrdersList() {
-  useWatermark("/icons/shopping-list.png");
+  useWatermark("/icons/order-processed.png");
 
   const [orders, setOrders] = useState([]);
   const [workers, setWorkers] = useState([]);
