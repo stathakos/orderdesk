@@ -4,6 +4,7 @@ import {
   getProducts, createProduct, updateProduct, deleteProduct,
   getIngredients, createIngredient, updateIngredient, deleteIngredient,
 } from "../services/api";
+import useWatermark from "../hooks/useWatermark"; 
 
 // ------------------------------------
 // Initial form states
@@ -12,6 +13,8 @@ const EMPTY_CATEGORY = { name: "", customizations: [], sizes:[] };
 const EMPTY_PRODUCT = { name: "", price: "", category_id: "", description: "", is_available: true };
 const EMPTY_INGREDIENT = { name: "", price: "", is_available: true };
 export default function MenuManager() {
+  useWatermark("/icons/menu.png");
+
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [ingredients, setIngredients] = useState([]);

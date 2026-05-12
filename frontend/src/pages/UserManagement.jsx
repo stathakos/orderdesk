@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getUsers, createUser, updateUser, deleteUser } from "../services/api";
+import useWatermark from "../hooks/useWatermark";
 
 const ROLES = ["admin", "manager", "delivery"];
 
@@ -13,6 +14,8 @@ const roleBadge = (role) => {
 };
 
 export default function UserManagement() {
+  useWatermark("/icons/user.png");
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

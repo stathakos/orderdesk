@@ -1,5 +1,6 @@
 import { useState, useEffect,  useRef } from "react";
 import { getDeliveryWorkers, getWorkerShiftSummary } from "../services/api";
+import useWatermark from "../hooks/useWatermark";
 
 const ORDER_TYPE_LABEL = {
   delivery_us: "Delivery (Us)",
@@ -20,6 +21,8 @@ const PAYMENT_LABEL = {
 };
 
 export default function ShiftSummary() {
+  useWatermark("/icons/summary.png");
+
   // const [workers, setWorkers] = useState([]);
   const [summaries, setSummaries] = useState([]);
   const [loading, setLoading] = useState(true);

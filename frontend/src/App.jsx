@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import CustomerSearch from "./components/CustomerSearch";
+import CustomerSearch from "./pages/CustomerSearch";
 import CreateOrder from "./pages/CreateOrder";
 import OrdersList from "./pages/OrdersList";
 import MenuManager from "./pages/MenuManager";
@@ -208,13 +208,6 @@ function Layout() {
 function App() {
   return (
     <Router>
-      {/* <NavBar />
-      <Routes>
-        <Route path="/" element={<CustomerSearch />} />
-        <Route path="/orders/new/:customerId" element={<CreateOrder />} />
-        <Route path="/orders" element={<OrdersList />} />
-        <Route path="/menu" element={<MenuManager />} />
-      </Routes> */}
       <Routes>
         {/* Public route — no navbar */}
         <Route path="/login" element={<LoginPage />} />

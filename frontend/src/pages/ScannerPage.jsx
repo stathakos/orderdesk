@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { getOrder, updateOrder, assignOrder, getDeliveryWorkers } from "../services/api";
 import Barcode from "react-barcode";
+import useWatermark from "../hooks/useWatermark";
 
 const WORKER_PREFIX = "WORKER:"; // prefix to distinguish worker scans from order scans
 
 export default function ScannerPage() {
+  useWatermark("/icons/scanner.png");
+
   const [workers, setWorkers] = useState([]);
   const [scanInput, setScanInput] = useState("");
   const [scannedOrder, setScannedOrder] = useState(null);
@@ -186,7 +189,7 @@ export default function ScannerPage() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#1a1a2e",
+        backgroundColor: "cadetblue",
         color: "white",
         padding: "clamp(1rem, 4vw, 2rem)",
       }}
@@ -213,7 +216,7 @@ export default function ScannerPage() {
         <div style={{ maxWidth: "400px", margin: "0 auto 2rem auto" }}>
             <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary text-white">
-                    {scanState === "waiting_order" ? "📦" : "🏷"}
+                    {scanState === "waiting_order" ? "🥡" : "🏷"}
                 </span>
                 <input
                     ref={inputRef}
@@ -240,7 +243,7 @@ export default function ScannerPage() {
                 )}
             </div>
             <div className="text-center mt-2">
-                <small style={{ color: "rgba(255,255,255,0.4)" }}>
+                <small style={{ color: "rgba(255,255,255,0.6)" }}>
                     {scanState === "waiting_order"
                     ? "Point the scanner at the QR code on the ticket, or type the order ID and press Enter"
                     : "Point the scanner at the worker's personal barcode"}
@@ -251,7 +254,7 @@ export default function ScannerPage() {
 
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold mb-0">📷 Order Scanner</h3>
+        <h3 className="fw-bold mb-0">🔍 Order Scanner</h3>
         <div className="d-flex gap-2">
           <button
             className="btn btn-outline-light btn-sm"
@@ -352,7 +355,7 @@ export default function ScannerPage() {
             gap: "1rem",
           }}
         >
-          <div style={{ fontSize: "5rem" }}>📦</div>
+          <div style={{ fontSize: "5rem" }}>🥡</div>
           <h4 className="text-white-50 text-center">
             Use the pistol scanner or type manually above
           </h4>

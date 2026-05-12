@@ -5,8 +5,11 @@ import {
   updateDeliveryWorker,
   deleteDeliveryWorker,
 } from "../services/api";
+import useWatermark from "../hooks/useWatermark"; 
 
 export default function DeliveryWorkers() {
+  useWatermark("/icons/food-delivery.png");
+  
   const [workers, setWorkers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

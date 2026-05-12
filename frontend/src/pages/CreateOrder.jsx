@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { createOrder, getCustomer } from "../services/api";
 import OrderForm from "../components/OrderForm";
+import useWatermark from "../hooks/useWatermark";
 
 
 export default function CreateOrder() {
+  useWatermark("/icons/order-now.png");
 
   const location = useLocation();
   const params = new URLSearchParams(location.search);

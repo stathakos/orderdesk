@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { searchCustomersByPhone, searchCustomersByName, deleteCustomer,getOrders } from "../services/api";
-import AddCustomerForm from "./AddCustomerForm";
-import CustomerTable from "./CustomerTable";
+import AddCustomerForm from "../components/AddCustomerForm";
+import CustomerTable from "../components/CustomerTable";
 import useDebounce from "../hooks/useDebounce";
+import useWatermark from "../hooks/useWatermark";
 
 
 export default function CustomerSearch() {
+  useWatermark("/icons/customer.png");
+
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [results, setResults] = useState([]);

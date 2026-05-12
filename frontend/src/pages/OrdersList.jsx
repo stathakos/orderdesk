@@ -5,6 +5,7 @@ import KitchenTicket from "../components/KitchenTicket";
 import usePrint from "../hooks/usePrint";
 import { getOrders, updateOrder, deleteOrder, getDeliveryWorkers, assignOrder, unassignOrder, closeShift, purgeOldOrders } from "../services/api";
 import { isAdmin } from "../services/authStore";
+import useWatermark from "../hooks/useWatermark";
  
 const ORDER_TYPES = [
   { value: "", label: "All Types" },
@@ -38,6 +39,8 @@ const STATUS_BADGE = {
 };
 
 export default function OrdersList() {
+  useWatermark("/icons/shopping-list.png");
+
   const [orders, setOrders] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [loading, setLoading] = useState(true);

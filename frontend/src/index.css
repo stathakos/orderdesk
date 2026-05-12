@@ -23,7 +23,7 @@ body::before {
   transform: translate(-50%, -50%);
   width: 400px;
   height: 400px;
-  background-image: url('/icons/food-delivery.png'); /* just put the image path here */
+  background-image: var(--watermark-url, url('/icons/restaurant.png')); 
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
