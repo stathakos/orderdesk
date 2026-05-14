@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { searchCustomersByPhone, searchCustomersByName, deleteCustomer,getOrders } from "../services/api";
+import { searchCustomersByPhone, searchCustomersByName, deleteCustomer,getOrders, getProducts } from "../services/api";
 import AddCustomerForm from "../components/AddCustomerForm";
 import CustomerTable from "../components/CustomerTable";
 import useDebounce from "../hooks/useDebounce";
@@ -22,6 +22,7 @@ export default function CustomerSearch() {
     inProgress: 0,
     delivered: 0,
     revenue: 0,
+    unavailable: 0,
   });
 
   const debouncedPhone = useDebounce(phone, 500);
@@ -34,17 +35,20 @@ export default function CustomerSearch() {
     async function fetchStats() {
       try {
         const today = new Date().toISOString().split("T")[0];
-        const [pending, inProgress, delivered] = await Promise.all([
+        const [pending, inProgress, delivered, allProducts] = await Promise.all([
           getOrders({ status: "pending", date_from: today, date_to: today }),
           getOrders({ status: "in_progress", date_from: today, date_to: today }),
           getOrders({ status: "delivered", date_from: today, date_to: today }),
+          getProducts(),
         ]);
         const revenue = delivered.reduce((sum, o) => sum + o.total, 0);
+        const unavailable = allProducts.filter((p) => !p.is_available).length;
         setStats({
           pending: pending.length,
           inProgress: inProgress.length,
           delivered: delivered.length,
           revenue,
+          unavailable,
         });
       } catch {
         // silently fail
@@ -161,6 +165,30 @@ export default function CustomerSearch() {
                 {stats.revenue.toFixed(2)} €
               </div>
               <div className="text-muted small">Revenue Today</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Unavailable products alert */}
+      <div className="row g-3 mb-4 justify-content-center">
+        <div className="col-6 col-md-3">
+          <div
+            className={`card text-center h-100 ${stats.unavailable > 0 ? "border-danger" : "border-success"}`}
+            style={{ cursor: stats.unavailable > 0 ? "pointer" : "default" }}
+            onClick={() => stats.unavailable > 0 && window.location.assign("/menu?tab=products")}
+            title={stats.unavailable > 0 ? "Click to go to Menu Manager" : "All products available"}
+          > Products Unavailable
+            <div className="card-body py-3">
+              <div style={{
+                fontSize: "1.8rem",
+                fontWeight: 900,
+                color: stats.unavailable > 0 ? "#ef4444" : "#22c55e"
+              }}>
+                {stats.unavailable}
+              </div>
+              <div className="text-muted small">
+                {stats.unavailable > 0 ? "⚠️ Unavailable" : "✅ All Available"}
+              </div>
             </div>
           </div>
         </div>

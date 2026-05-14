@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { getOrder, updateOrder, assignOrder, getDeliveryWorkers } from "../services/api";
+import { getOrder, updateOrder, assignOrder, getDeliveryWorkers, getWorkerShiftSummary } from "../services/api";
 import Barcode from "react-barcode";
 import useWatermark from "../hooks/useWatermark";
 
@@ -96,10 +96,18 @@ export default function ScannerPage() {
       setError(null);
       try {
         await assignOrder(scannedOrder.id, workerId);
-        await updateOrder(scannedOrder.id, { status: "in_progress" });
-        setSuccessMsg(
-          `Order #${scannedOrder.id} assigned to ${worker.name} and marked In Progress!`
-        );
+        await updateOrder(scannedOrder.id, { status: "ready" });
+
+        // Fetch today's delivered count for this worker
+        const today = new Date().toISOString().split("T")[0];
+        const summary = await getWorkerShiftSummary(worker.id);
+
+        setSuccessMsg({
+          text: `Order #${scannedOrder.id} assigned to ${worker.name} and marked as Ready!`,
+          workerName: worker.name,
+          ordersDelivered: summary.orders_delivered,
+          totalCash: summary.total_cash,
+        });
         setScanState("waiting_order");
         setScannedOrder(null);
       } catch {
@@ -139,7 +147,7 @@ export default function ScannerPage() {
     return (
       <div className="container mt-4" id="barcodes-sheet">
         <div className="d-flex justify-content-between align-items-center mb-4 d-print-none">
-          <h4 className="fw-bold mb-0">🏷 Worker Barcodes</h4>
+          <h4 className="fw-bold mb-0">🛵 Worker Barcodes</h4>
           <div className="d-flex gap-2">
             <button className="btn btn-outline-dark" onClick={() => window.print()}>
               🖨 Print Sheet
@@ -216,7 +224,7 @@ export default function ScannerPage() {
         <div style={{ maxWidth: "400px", margin: "0 auto 2rem auto" }}>
             <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary text-white">
-                    {scanState === "waiting_order" ? "🥡" : "🏷"}
+                    {scanState === "waiting_order" ? "🥡" : "🛵"}
                 </span>
                 <input
                     ref={inputRef}
@@ -260,7 +268,7 @@ export default function ScannerPage() {
             className="btn btn-outline-light btn-sm"
             onClick={() => setShowBarcodes(true)}
           >
-            🏷 Worker Barcodes
+            🛵 Worker Barcodes
           </button>
           {(scannedOrder || error) && (
             <button className="btn btn-outline-danger btn-sm" onClick={handleClear}>
@@ -318,7 +326,39 @@ export default function ScannerPage() {
           }}
         >
           <div style={{ fontSize: "5rem" }}>✅</div>
-          <h4 className="text-success text-center">{successMsg}</h4>
+          <h4 className="text-success text-center">{successMsg.text}</h4>
+          {/* Worker stats */}
+          <div
+            style={{
+              backgroundColor: "rgba(255,255,255,0.1)",
+              borderRadius: "12px",
+              padding: "1.5rem 2rem",
+              textAlign: "center",
+              minWidth: "250px",
+            }}
+          >
+            <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+              {successMsg.workerName} — today
+            </div>
+            <div className="d-flex gap-4 justify-content-center">
+              <div>
+                <div style={{ fontSize: "2rem", fontWeight: 900, color: "#4ade80" }}>
+                  {successMsg.ordersDelivered}
+                </div>
+                <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8rem" }}>
+                  delivered
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "2rem", fontWeight: 900, color: "#facc15" }}>
+                  {successMsg.totalCash.toFixed(2)}€
+                </div>
+                <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8rem" }}>
+                  cash
+                </div>
+              </div>
+            </div>
+          </div>
           <p className="text-white-50 small">Ready for next scan in a moment...</p>
         </div>
       )}
@@ -439,7 +479,7 @@ export default function ScannerPage() {
               textAlign: "center",
             }}
           >
-            <div style={{ fontSize: "3rem", marginBottom: "0.5rem" }}>🏷</div>
+            <div style={{ fontSize: "3rem", marginBottom: "0.5rem" }}>🛵</div>
             <h5 style={{ color: "#f59e0b" }}>Now scan the worker's barcode</h5>
             <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.9rem", marginBottom: 0 }}>
               or <button

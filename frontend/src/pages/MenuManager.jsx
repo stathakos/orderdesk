@@ -35,7 +35,10 @@ export default function MenuManager() {
   const [editingIngredientId, setEditingIngredientId] = useState(null);
 
   // UI state
-  const [activeTab, setActiveTab] = useState("categories"); // "categories" | "products"
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") || "categories";                // "categories" | "products"
+  });
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false); // mobile: toggle form visibility
 
