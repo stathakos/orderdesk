@@ -534,11 +534,11 @@ export default function MenuManager() {
 
           {/* Category filter pills */}
           <div className="d-flex justify-content-center flex-wrap gap-1 mb-3">
-            <button className={`btn btn-sm ${selectedCategory === null ? "btn-dark" : "btn-outline-secondary"}`}
+            <button className={`btn btn-sm ${selectedCategory === null ? "btn-theme" : "btn-outline-secondary"}`}
               onClick={() => setSelectedCategory(null)}>All</button>
             {categories.map((cat) => (
               <button key={cat.id}
-                className={`btn btn-sm ${selectedCategory === cat.id ? "btn-dark" : "btn-outline-secondary"}`}
+                className={`btn btn-sm ${selectedCategory === cat.id ? "btn-theme" : "btn-outline-secondary"}`}
                 onClick={() => setSelectedCategory(cat.id)}>{cat.name}</button>
             ))}
           </div>

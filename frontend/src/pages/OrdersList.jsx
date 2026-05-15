@@ -334,25 +334,25 @@ export default function OrdersList() {
         <div className="col-12 col-md-auto">
           <div className="btn-group btn-group-sm">
             <button
-              className={`btn ${dateFrom === today && dateTo === today ? "btn-dark" : "btn-outline-dark"}`}
+              className={`btn ${dateFrom === today && dateTo === today ? "btn-theme" : "btn-outline-theme"}`}
               onClick={() => setQuickDate("today")}
             >
               Today
             </button>
             <button
-              className="btn btn-outline-dark"
+              className="btn btn-outline-theme"
               onClick={() => setQuickDate("7days")}
             >
               7 Days
             </button>
             <button
-              className="btn btn-outline-dark"
+              className="btn btn-outline-theme"
               onClick={() => setQuickDate("30days")}
             >
               30 Days
             </button>
             <button
-              className={`btn ${!dateFrom && !dateTo ? "btn-dark" : "btn-outline-dark"}`}
+              className={`btn ${!dateFrom && !dateTo ? "btn-theme" : "btn-outline-theme"}`}
               onClick={() => setQuickDate("all")}
             >
               All
@@ -453,7 +453,7 @@ export default function OrdersList() {
                           </button>
                           <div className="btn-group">
                             <button
-                              className="btn btn-sm btn-outline-dark dropdown-toggle"
+                              className="btn btn-sm btn-outline-theme dropdown-toggle"
                               data-bs-toggle="dropdown"
                               aria-expanded="false"
                             >
@@ -586,7 +586,7 @@ export default function OrdersList() {
                     </button>
                     <div className="btn-group">
                       <button
-                        className="btn btn-sm btn-outline-dark dropdown-toggle"
+                        className="btn btn-sm btn-outline-theme dropdown-toggle"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                       >
@@ -700,7 +700,7 @@ export default function OrdersList() {
                   </div>
                 </div>
                 <button
-                  className="btn btn-dark w-100"
+                  className="btn btn-theme w-100"
                   onClick={() => {
                     setShowCloseShift(false);
                     setCloseShiftResult(null);
@@ -780,7 +780,7 @@ export default function OrdersList() {
                   </div>
                 </div>
                 <button
-                  className="btn btn-dark w-100"
+                  className="btn btn-theme w-100"
                   onClick={() => {
                     setShowPurge(false);
                     setPurgeResult(null);

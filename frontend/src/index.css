@@ -35,3 +35,36 @@ body::before {
 [data-bs-theme="dark"] body::before {
   opacity: 0.1;
 }
+
+.btn-outline-theme {
+  border-color: #212529 !important;
+  color: #212529 !important;
+}
+
+.btn-outline-theme:hover {
+  background-color: #212529 !important;
+  color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .btn-outline-theme {
+  border-color: #f8f9fa !important;
+  color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .btn-outline-theme:hover {
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+}
+
+.btn-theme {
+  background-color: #212529 !important;
+  color: #f8f9fa !important;
+  border-color: #212529 !important;
+}
+
+
+[data-bs-theme="dark"] .btn-theme {
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+  border-color: #f8f9fa !important;
+}

@@ -173,7 +173,7 @@ export default function ShiftSummary() {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold mb-0">📋 Shift Summary</h4>
-        <button className="btn btn-outline-dark" onClick={handlePrintAll}>
+        <button className="btn btn-outline-theme" onClick={handlePrintAll}>
           🖨 Print All
         </button>
       </div>
