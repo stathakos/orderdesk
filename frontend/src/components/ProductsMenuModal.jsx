@@ -112,7 +112,7 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
         transform: "translateX(-50%)",
         width: "min(1100px, 96vw)",
         maxHeight: "94vh",
-        backgroundColor: "white",
+        backgroundColor: "var(--bs-body-bg)",
         borderRadius: "10px",
         zIndex: 10003,
         display: "flex",
@@ -166,7 +166,7 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                     onClick={() => { closeSidebar(); setShowCustomPizza(true); }}
                     style={{
                       cursor: "pointer",
-                      backgroundColor: "#fff5f5",
+                      backgroundColor: "var(--bs-body-bg)", // #fff5f5
                       transition: "transform 0.15s, box-shadow 0.15s",
                     }}
                   >
@@ -195,7 +195,7 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                         transition: "transform 0.15s, box-shadow 0.15s",
                         transform: isActive ? "scale(1.03)" : "scale(1)",
                         boxShadow: isActive ? "0 0 0 2px #0d6efd" : "none",
-                        backgroundColor: isUnavailable ? "#f0f0f0" : isActive ? "#f0f8ff" : "white",
+                        backgroundColor: isUnavailable ? "var(--bs-secondary-bg)" : isActive ? "var(--bs-primary-bg-subtle)" : "var(--bs-body-bg)",
                         opacity: isUnavailable ? 0.6 : 1,
                       }}
                     >
@@ -503,7 +503,7 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
         transform: "translate(-50%, -50%)",
         width: "min(540px, 95vw)",
         maxHeight: "90vh",
-        backgroundColor: "white",
+        backgroundColor: "var(--bs-body-bg)",
         borderRadius: "10px",
         zIndex: 10005,
         display: "flex",

@@ -229,7 +229,7 @@ export default function ScannerPage() {
                 <input
                     ref={inputRef}
                     type="text"
-                    className="form-control bg-dark text-white border-secondary"
+                    className="form-control"
                     value={scanInput}
                     onChange={(e) => setScanInput(e.target.value)}
                     onKeyDown={handleScan}

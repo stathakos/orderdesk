@@ -40,25 +40,25 @@ api.interceptors.response.use(
 
 // Customer APIs
 export const searchCustomersByPhone = (phone) => 
-  api.get("/customers/search", { params: { phone } }).then((response) => response.data);
+  api.get("/customers/search", { params: { phone } }).then((r) => r.data);
 
 export const searchCustomersByName = (name) => 
-  api.get("/customers/search", { params: { name } }).then((response) => response.data);
+  api.get("/customers/search", { params: { name } }).then((r) => r.data);
+
+export const getAllCustomers = () =>
+  api.get("/customers/").then((response) => response.data);
 
 export const getCustomer = (customerId) => 
-  api.get(`/customers/${customerId}`).then((response) => response.data);
+  api.get(`/customers/${customerId}`).then((r) => r.data);
 
-export const createCustomer = (data) => {
-  return api.post(`/customers/`, data).then((response) => response.data);
-};
+export const createCustomer = (data) => 
+  api.post(`/customers/`, data).then((r) => r.data);
 
-export const updateCustomer = (customerId, data) => {
-  return api.patch(`/customers/${customerId}`, data).then((response) => response.data);
-};
+export const updateCustomer = (customerId, data) => 
+  api.patch(`/customers/${customerId}`, data).then((r) => r.data);
 
-export const deleteCustomer = (CustomerId) => {
-  return api.delete(`/customers/${CustomerId}`).then((response) => response.data);
-};
+export const deleteCustomer = (CustomerId) => 
+  api.delete(`/customers/${CustomerId}`).then((r) => r.data);
 
 // ------------------------------------
 // Categories APIs
@@ -161,6 +161,8 @@ export const getMe = () =>
 export const changeMyPassword = (data) =>
   api.patch("/auth/me/password", data).then((r) => r.data);
 
+export const refreshToken = () =>
+  api.post("/auth/refresh").then((r) => r.data);
 
 export default api;
 

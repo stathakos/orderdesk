@@ -23,7 +23,7 @@ export default function AssignWorkerModal({ order, workers, onConfirm, onSkip, r
           left: "50%",
           transform: "translate(-50%, -50%)",
           width: "min(440px, 95vw)",
-          backgroundColor: "white",
+          backgroundColor: "var(--bs-body-bg)",
           borderRadius: "10px",
           zIndex: 10001,
           padding: "clamp(1.25rem, 4vw, 2rem)",

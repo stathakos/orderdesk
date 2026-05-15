@@ -58,3 +58,12 @@ def change_my_password(
     setattr(current_user, "hashed_password", security.hash_password(body.new_password))
     db.commit()
     return {"message": "Password changed successfully"}
+
+
+@router.post("/refresh", response_model=schemas.Token)
+def refresh_token(current_user: models.User = Depends(get_current_user)):
+    """Issue a fresh token for the currently logged in user."""
+    access_token = security.create_access_token(
+        data={"sub": current_user.username, "role": current_user.role}
+    )
+    return {"access_token": access_token, "token_type": "bearer"}

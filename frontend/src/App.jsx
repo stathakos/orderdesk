@@ -10,9 +10,11 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ChangePasswordModal from "./components/ChangePasswordModal";
 import DeliveryWorkers from "./pages/DeliveryWorkers";
 import ShiftSummary from "./pages/ShiftSummary";
+import useTokenRefresh from "./hooks/useTokenRefresh";
 import { isAuthenticated, isAdmin, isManager, getUser, logout } from "./services/authStore";
 import { getOrders } from "./services/api";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from "react-router-dom";
+import useDarkMode from "./hooks/useDarkMode";
 
 function NavBar() {
   const [open, setOpen] = useState(false);
@@ -21,6 +23,7 @@ function NavBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const user = getUser();
+  const { darkMode, toggleDarkMode } = useDarkMode();
 
   // Fetch pending + in_progress orders count every 30 seconds
   useEffect(() => {
@@ -104,6 +107,16 @@ function NavBar() {
                 </Link>
               </li>
             ))}
+            {/* Dark mode toggle */}
+            <li className="nav-item d-flex align-items-center">
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                onClick={toggleDarkMode}
+                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {darkMode ? "☀️" : "🌙"}
+              </button>
+            </li>
             {/* Logged in user info + logout */}
             {user && (
               <li className="nav-item d-flex align-items-center gap-2 ms-md-3 mt-2 mt-md-0">
@@ -131,6 +144,7 @@ function NavBar() {
 }
 
 function Layout() {
+  useTokenRefresh();
   return (
     <>
       <NavBar />

@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { searchCustomersByPhone, searchCustomersByName, deleteCustomer,getOrders, getProducts } from "../services/api";
+import { searchCustomersByPhone, searchCustomersByName, deleteCustomer, getAllCustomers, getOrders, getProducts } from "../services/api";
 import AddCustomerForm from "../components/AddCustomerForm";
 import CustomerTable from "../components/CustomerTable";
 import useDebounce from "../hooks/useDebounce";
 import useWatermark from "../hooks/useWatermark";
-
 
 export default function CustomerSearch() {
   useWatermark("/icons/customer.png");
@@ -15,6 +14,7 @@ export default function CustomerSearch() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   // Stats
   const [stats, setStats] = useState({
@@ -60,6 +60,7 @@ export default function CustomerSearch() {
   const handlePhoneChange = (e) => {
     const value = e.target.value;
     if (/^\d*$/.test(value)) {  // numbers only
+      setShowAll(false);
       setPhone(value);
       setName(""); // clear name search
     }
@@ -67,6 +68,7 @@ export default function CustomerSearch() {
 
 
   const handleNameChange = (e) => {
+    setShowAll(false);
     setName(e.target.value);
     setPhone(""); // clear phone when typing name
   };
@@ -117,11 +119,19 @@ export default function CustomerSearch() {
       // RESET
       setResults([]);
       setHasSearched(false);
+      setShowAll(false);
     };
 
     fetchData();
 
   }, [debouncedPhone, debouncedName]);
+
+  async function handleShowAll() {
+    const data = await getAllCustomers();
+    setResults(data);
+    setHasSearched(true);
+    setShowAll(true);
+  }
 
   return (
     <div className="container-fluid px-3 px-md-4 my-4">
@@ -159,7 +169,7 @@ export default function CustomerSearch() {
           </div>
         </div>
         <div className="col-6 col-md-3">
-          <div className="card text-center border-dark h-100">
+          <div className="card text-center border-secondary h-100">
             <div className="card-body py-3">
               <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>
                 {stats.revenue.toFixed(2)} €
@@ -229,6 +239,17 @@ export default function CustomerSearch() {
             }}
           >
             + New
+          </button>
+        </div>
+      </div>
+      <div className="row justify-content-center g-2 mb-3">
+        <div className="col-12 col-sm-5 col-md-4">
+          <button
+            className="btn btn-outline-secondary w-100"
+            onClick={handleShowAll}
+            title="Show all customers"
+          >
+            👥 Show All Customers
           </button>
         </div>
       </div>

@@ -58,7 +58,7 @@ return (
     <div
       style={{
         width: "min(420px, 95vw)",
-        backgroundColor: "white",
+        backgroundColor: "var(--bs-body-bg)",
         borderRadius: "10px",
         padding: "clamp(1.25rem, 4vw, 2rem)",
         boxShadow: "0 8px 32px rgba(0,0,0,0.35)",

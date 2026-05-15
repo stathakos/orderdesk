@@ -61,7 +61,7 @@ export default function EditOrderModal({ order, onClose, onSaved }) {
           width: "min(700px, 95vw)",
           maxHeight: "92vh",
           overflowY: "auto",
-          backgroundColor: "white",
+          backgroundColor: "var(--bs-body-bg)",
           borderRadius: "10px",
           zIndex: 10001,
           padding: "clamp(0.75rem, 3vw, 1.5rem)",

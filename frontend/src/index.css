@@ -31,3 +31,7 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
+
+[data-bs-theme="dark"] body::before {
+  opacity: 0.1;
+}

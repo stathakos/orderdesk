@@ -72,7 +72,7 @@ export default function CustomerOrderHistory({ customer, onClose }) {
           transform: "translate(-50%, -50%)",
           width: "min(700px, 95vw)",
           maxHeight: "90vh",
-          backgroundColor: "white",
+          backgroundColor: "var(--bs-body-bg)",
           borderRadius: "10px",
           zIndex: 10001,
           display: "flex",
@@ -89,6 +89,25 @@ export default function CustomerOrderHistory({ customer, onClose }) {
           </div>
           <button className="btn btn-sm btn-outline-secondary" onClick={onClose}>✕</button>
         </div>
+
+        {/* Loyalty badge */}
+        {!loading && !error && (
+          <div className="text-center py-2 border-bottom">
+            {orders.length >= 50 ? (
+              <span className="badge fs-6 px-3 py-2" style={{ backgroundColor: "#f59e0b" }}>
+                🥇 VIP Customer
+              </span>
+            ) : orders.length >= 20 ? (
+              <span className="badge fs-6 px-3 py-2 bg-secondary">
+                🥈 Regular Customer
+              </span>
+            ) : (
+              <span className="badge fs-6 px-3 py-2 bg-light text-dark">
+                🆕 New Customer
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Stats */}
         {!loading && !error && (
@@ -108,6 +127,12 @@ export default function CustomerOrderHistory({ customer, onClose }) {
                 {totalSpent.toFixed(2)}€
               </div>
               <div className="text-muted small">Total Spent</div>
+            </div>
+            <div className="col-3 text-center p-3">
+              <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#3b82f6" }}>
+                {orders.length > 0 ? (totalSpent / orders.filter(o => o.status === "delivered").length || 0).toFixed(2) : "0.00"}€
+              </div>
+              <div className="text-muted small">Avg Order</div>
             </div>
           </div>
         )}

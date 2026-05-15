@@ -83,7 +83,7 @@ export default function AddCustomerForm({ initialPhone, initialName, onClose, on
           left: "50%",
           transform: "translate(-50%, -50%)",
           width: "min(500px, 95vw)",
-          backgroundColor: "white",
+          backgroundColor: "var(--bs-body-bg)",
           borderRadius: "10px",
           zIndex: 9001,
           padding: "clamp(1rem, 3vw, 1.5rem)",
