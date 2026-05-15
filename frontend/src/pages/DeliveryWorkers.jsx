@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Barcode from "react-barcode";
 import {
   getDeliveryWorkers,
   createDeliveryWorker,
@@ -6,6 +7,8 @@ import {
   deleteDeliveryWorker,
 } from "../services/api";
 import useWatermark from "../hooks/useWatermark"; 
+
+const WORKER_PREFIX = "WORKER:";
 
 export default function DeliveryWorkers() {
   useWatermark("/icons/food-delivery.png");
@@ -19,6 +22,7 @@ export default function DeliveryWorkers() {
   const [formData, setFormData] = useState({ name: "", phone: "" });
   const [formError, setFormError] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [showBarcodes, setShowBarcodes] = useState(false);
 
   // ------------------------------------
   // Load workers
@@ -89,17 +93,75 @@ export default function DeliveryWorkers() {
   if (loading) return <div className="text-center mt-5"><div className="spinner-border" /></div>;
   if (error) return <div className="alert alert-danger mx-3">{error}</div>;
 
+  // ------------------------------------
+  // Barcodes sheet
+  // ------------------------------------
+  if (showBarcodes) {
+    return (
+      <div className="container mt-4" id="barcodes-sheet">
+        <div className="d-flex justify-content-between align-items-center mb-4 d-print-none">
+          <h4 className="fw-bold mb-0">🛵 Worker Barcodes</h4>
+          <div className="d-flex gap-2">
+            <button className="btn btn-outline-theme" onClick={() => window.print()}>
+              🖨 Print Sheet
+            </button>
+            <button className="btn btn-outline-secondary" onClick={() => setShowBarcodes(false)}>
+              ← Back
+            </button>
+          </div>
+        </div>
+
+        <div className="row g-4 justify-content-center">
+          {workers.map((worker) => (
+            <div key={worker.id} className="col-10 col-md-6 col-lg-4">
+              <div
+                className="card text-center p-3 align-items-center"
+                style={{ border: "2px solid #000" }}
+              >
+                <div className="fw-bold fs-5 mb-2">{worker.name}</div>
+                {worker.phone && (
+                  <div className="text-muted small mb-2">{worker.phone}</div>
+                )}
+                <Barcode
+                  value={`${WORKER_PREFIX}${worker.id}`}
+                  width={1.5}
+                  height={60}
+                  fontSize={12}
+                  displayValue={true}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {workers.length === 0 && (
+          <p className="text-muted text-center mt-4">
+            No active delivery workers found. Add workers first.
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="container-fluid px-3 px-md-4 mt-4" style={{ maxWidth: "700px" }}>
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold mb-0">🛵 Delivery Workers</h4>
-        <button
-          className="btn btn-danger"
-          onClick={() => { setShowForm((prev) => !prev); setFormError(null); }}
-        >
-          {showForm ? "Cancel" : "+ New Worker"}
-        </button>
+        <div className="d-flex gap-2">
+          <button
+            className="btn btn-outline-theme btn-sm"
+            onClick={() => setShowBarcodes(true)}
+          >
+            🛵 Worker Barcodes
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={() => { setShowForm((prev) => !prev); setFormError(null); }}
+          >
+            {showForm ? "Cancel" : "+ New Worker"}
+          </button>
+        </div>
       </div>
 
       {/* Create worker form */}
