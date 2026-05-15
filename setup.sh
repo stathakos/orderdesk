@@ -48,7 +48,15 @@ echo "✅ Frontend dependencies installed"
 
 # Create .env if it doesn't exist
 if [ ! -f ".env" ]; then
-    LOCAL_IP=$(hostname -I | awk '{print $1}')
+    # Try Linux way first, then Windows way
+    LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+    if [ -z "$LOCAL_IP" ]; then
+        # Windows fallback
+        LOCAL_IP=$(ipconfig 2>/dev/null | grep "IPv4" | head -1 | awk '{print $NF}' | tr -d '\r')
+    fi
+    if [ -z "$LOCAL_IP" ]; then
+        LOCAL_IP="localhost"
+    fi
     echo "VITE_API_URL=http://$LOCAL_IP:8000" > .env
     echo "✅ Created .env with IP: $LOCAL_IP"
 else
