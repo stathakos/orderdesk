@@ -228,7 +228,7 @@ export default function CustomerSearch() {
         </div>
         <div className="col-12 col-sm-2 col-md-2">
           <button
-            className="btn btn-dark w-100"
+            className="btn btn-theme w-100"
             onClick={() => {
               if (phone.length !== 10 && name.trim().length < 2) {
                 alert("Please enter a valid 10-digit phone number to add a new customer.");

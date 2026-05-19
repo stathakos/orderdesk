@@ -230,7 +230,7 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
               // Mobile: fixed height strip at the bottom
               borderTop: "1px solid #dee2e6",
               borderLeft: "none",
-              backgroundColor: "#f8f9fa",
+              backgroundColor: "var(--bs-tertiary-bg)",
               overflowY: "auto",
               padding: "1rem",
             }}
@@ -312,9 +312,12 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                                     <div
                                       key={cust.name}
                                       className={`d-flex align-items-center gap-2 p-2 mb-1 rounded ${
-                                        isSelected ? "bg-warning bg-opacity-20 border border-warning" : "bg-white border"
+                                        isSelected ? "bg-warning bg-opacity-20 border border-warning" : "border"
                                       }`}
-                                      style={{ cursor: "pointer" }}
+                                      style={{ 
+                                        cursor: "pointer",
+                                        backgroundColor: isSelected ? undefined : "var(--bs-body-bg)",
+                                       }}
                                       onClick={() => {
                                         // Single select — deselect all others in single group, select this one
                                         setCheckedCustomizations((prev) => {
@@ -353,9 +356,12 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                                     <div
                                       key={cust.name}
                                       className={`d-flex align-items-center gap-2 p-2 mb-1 rounded ${
-                                        checked ? "bg-primary bg-opacity-10 border border-primary" : "bg-white border"
+                                        checked ? "bg-primary bg-opacity-10 border border-primary" : "border"
                                       }`}
-                                      style={{ cursor: "pointer" }}
+                                      style={{ 
+                                        cursor: "pointer",
+                                        backgroundColor: checked ? undefined : "var(--bs-body-bg)", 
+                                      }}
                                       onClick={() => toggleCustomization(cust.name)}
                                     >
                                       <input type="checkbox" className="form-check-input mt-0"
