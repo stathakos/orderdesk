@@ -100,7 +100,9 @@ class Customer(Base):
     floor = Column(String(50), nullable=True)
     notes = Column(String(255), nullable=True)
 
-    orders = relationship("Order", back_populates="customer")
+    orders = relationship(
+        "Order", back_populates="customer", foreign_keys="[Order.customer_id]"
+    )
 
 
 class Category(Base):
@@ -152,7 +154,9 @@ class Order(Base):
     is_archived = Column(Boolean, default=False, nullable=False)
     daily_sequence = Column(Integer, nullable=True)
 
-    customer = relationship("Customer", back_populates="orders")
+    customer = relationship(
+        "Customer", back_populates="orders", foreign_keys="[Order.customer_id]"
+    )
     assigned_worker = relationship("DeliveryWorker", back_populates="orders")
     items = relationship(
         "OrderItem", back_populates="order", cascade="all, delete-orphan"

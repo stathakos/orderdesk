@@ -48,7 +48,7 @@ export default function OrdersList() {
   const [filterType, setFilterType] = useState("");
   const [filterPaymentMethod, setFilterPaymentMethod] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [filterCustomerId, setFilterCustomerId] = useState("");
+  const [filterCustomerName, setFilterCustomerName] = useState("");
   const [expandedId, setExpandedId] = useState(null);
   const [editingOrder, setEditingOrder] = useState(null);
   const { printKitchen, printDelivery, orderToPrint, printVariant } = usePrint();
@@ -76,7 +76,7 @@ export default function OrdersList() {
       if (filterType) filters.order_type = filterType;
       if (filterPaymentMethod) filters.payment_method = filterPaymentMethod;
       if (filterStatus) filters.status = filterStatus;
-      if (filterCustomerId) filters.customer_id = parseInt(filterCustomerId);
+      if (filterCustomerName) filters.customer_name = filterCustomerName;
       if (dateFrom) filters.date_from = dateFrom;
       if (dateTo) filters.date_to = dateTo;
       // Auto-include archived when looking at anything other than today
@@ -116,7 +116,7 @@ export default function OrdersList() {
   useEffect(() => {
     fetchOrders();
     fetchWorkers();
-  }, [filterType, filterPaymentMethod, filterStatus, filterCustomerId, dateFrom, dateTo, includeArchived]);
+  }, [filterType, filterPaymentMethod, filterStatus, filterCustomerName, dateFrom, dateTo, includeArchived]);
   
   async function handleStatusChange(orderId, newStatus) {
     // Find the order
@@ -294,9 +294,9 @@ export default function OrdersList() {
           </select>
         </div>
         <div className="col-6 col-md-3">
-          <input type="number" className="form-control form-control-sm"
-            placeholder="Customer ID" value={filterCustomerId}
-            onChange={(e) => setFilterCustomerId(e.target.value)} />
+          <input type="text" className="form-control form-control-sm"
+            placeholder="Customer Name" value={filterCustomerName}
+            onChange={(e) => setFilterCustomerName(e.target.value)} />
         </div>
         <div className="col-6 col-md-auto d-flex align-items-center gap-2">
           <div className="form-check mb-0">
@@ -318,7 +318,7 @@ export default function OrdersList() {
               setFilterType(""); 
               setFilterPaymentMethod(""); 
               setFilterStatus(""); 
-              setFilterCustomerId(""); 
+              setFilterCustomerName(""); 
               setIncludeArchived(false);
               setDateFrom(today);
               setDateTo(today);

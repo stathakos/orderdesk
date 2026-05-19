@@ -110,7 +110,7 @@ export const deleteProduct = (productId) =>
  
 export const getOrders = (filters = {}) =>
   api.get("/orders/", { params: filters }).then((r) => r.data);
-  // filters: { customer_id, order_type, status, skip, limit }
+  // filters: { customer_name, order_type, payment_method, status, date_from, date_to, include_archived, skip, limit }
  
 export const getOrder = (orderId) =>
   api.get(`/orders/${orderId}`).then((r) => r.data);

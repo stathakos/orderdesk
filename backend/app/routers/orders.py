@@ -58,6 +58,7 @@ def _resolve_item_price(item: schemas.OrderItemCreate, db: Session) -> float:
 @router.get("/", response_model=list[schemas.OrderResponse])
 def get_orders(
     customer_id: int | None = None,
+    customer_name: str | None = None,
     order_type: models.OrderType | None = None,
     payment_method: models.PaymentMethod | None = None,
     status: models.OrderStatus | None = None,
@@ -77,6 +78,10 @@ def get_orders(
 
     if customer_id is not None:
         query = query.filter(models.Order.customer_id == customer_id)
+    if customer_name is not None:
+        query = query.join(models.Order.customer).filter(
+            models.Customer.name.ilike(f"%{customer_name}%")
+        )
     if not include_archived:
         query = query.filter(models.Order.is_archived.is_(False))
     if order_type is not None:
