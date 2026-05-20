@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from .models import OrderType, PaymentMethod, OrderStatus, UserRole
@@ -170,6 +170,11 @@ class CategoryResponse(BaseModel):
     name: str
     customizations: List[Dict[str, Any]] = Field(default_factory=list)
     sizes: List[Dict[str, Any]] = Field(default_factory=list)
+
+    @field_validator("customizations", "sizes", mode="before")
+    @classmethod
+    def empty_list_if_none(cls, v):
+        return v or []
 
     model_config = {"from_attributes": True}
 
