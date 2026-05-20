@@ -44,6 +44,7 @@ def create_category(
     db_category = models.Category(
         name=category.name,
         customizations=category.customizations or [],
+        sizes=category.sizes or [],
     )
     db.add(db_category)
     db.commit()
