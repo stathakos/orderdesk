@@ -6,8 +6,7 @@ import os
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-assert DATABASE_URL is not None, "DATABASE_URL environment variable is not set"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./restaurant.db")
 
 engine = create_engine(
     DATABASE_URL,
