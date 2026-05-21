@@ -34,8 +34,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      logout();
-      window.location.href = "/login";
+      // Dynamic import to avoid circular dependency
+      import("./authStore").then(({ logout }) => {
+        logout();
+        window.location.href = "/login";
+      });
     }
     return Promise.reject(error);
   }
