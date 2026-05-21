@@ -1,9 +1,6 @@
 import axios from "axios";
 import { getToken, logout } from "./authStore";
 
-// DEBUG — remove after fixing
-console.log("api.js loaded, logout is:", typeof logout);
-
 const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"; // FastAPI backend
 
 const api = axios.create({
@@ -34,11 +31,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Dynamic import to avoid circular dependency
-      import("./authStore").then(({ logout }) => {
-        logout();
-        window.location.href = "/login";
-      });
+      logout();
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
