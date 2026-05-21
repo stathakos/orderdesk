@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 echo ================================================
 echo   OrderDesk - Setup Script (Windows)
 echo ================================================
@@ -60,8 +61,8 @@ REM Create .env if it doesn't exist
 if not exist ".env" (
     echo.
     set /p USER_IP="Enter your local IP address (e.g. 192.168.1.36): "
-    echo VITE_API_URL=http://%USER_IP%:8000> .env
-    echo [OK] Created .env with IP: %USER_IP%
+    (echo VITE_API_URL=http://%USER_IP%:8000) > .env
+    echo [OK] Created .env with IP: !USER_IP!
 ) else (
     echo [OK] .env already exists
 )
