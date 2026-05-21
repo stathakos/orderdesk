@@ -1,15 +1,21 @@
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from dotenv import load_dotenv
 
 # ------------------------------------
 # Configuration
 # ------------------------------------
 
+load_dotenv()
+
 # Change SECRET_KEY to a long random string in production!
 # Generate one with: python -c "import secrets; print(secrets.token_hex(32))"
-SECRET_KEY = "change-this-to-a-long-random-secret-key-in-production"
+SECRET_KEY = os.getenv(
+    "SECRET_KEY", "change-this-to-a-long-random-secret-key-in-production"
+)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8  # 8 hours — a full work shift
 

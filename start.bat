@@ -52,7 +52,7 @@ echo [OK] All updates applied!
 echo.
 
 REM Start backend silently
-start /min "" cmd /c "cd /d "%~dp0backend" && call venv\Scripts\activate.bat && uvicorn app.main:app --host 0.0.0.0 --port 8000 > nul 2>&1"
+start "" cmd /k "cd /d "%~dp0backend" && call venv\Scripts\activate.bat && uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
 REM Wait for backend to start
 timeout /t 3 /nobreak > nul
@@ -66,4 +66,8 @@ echo.
 for /f %%i in ('powershell -command "(Get-NetIPAddress -AddressFamily IPv4 -InterfaceIndex (Get-NetRoute -DestinationPrefix 0.0.0.0/0).ifIndex).IPAddress"') do set LOCAL_IP=%%i
 echo App available at: http://%LOCAL_IP%:4173
 echo.
+echo ================================================
+echo   WARNING: Default admin password is admin123
+echo   Change it immediately after first login!
+echo ================================================
 pause

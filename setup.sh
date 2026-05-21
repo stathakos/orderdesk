@@ -40,6 +40,16 @@ source venv/bin/activate
 pip install -r requirements.txt --quiet
 echo "✅ Backend dependencies installed"
 
+# Create backend .env if it doesn't exist  ← NEW
+if [ ! -f ".env" ]; then
+    SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))")
+    echo "DATABASE_URL=sqlite:///./restaurant.db" > .env
+    echo "SECRET_KEY=$SECRET" >> .env
+    echo "✅ Created backend .env with generated secret key"
+else
+    echo "✅ Backend .env already exists"
+fi
+
 echo ""
 echo "Setting up frontend..."
 cd "../frontend"
@@ -70,5 +80,7 @@ echo "✅ Frontend built"
 echo ""
 echo "================================================"
 echo "  Setup complete!"
+echo "  ⚠️  Default admin: username=admin password=admin123"
+echo "  ⚠️  Change the admin password after first login!"
 echo "  Run ./start.sh to launch OrderDesk"
 echo "================================================"

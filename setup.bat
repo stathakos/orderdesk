@@ -39,6 +39,17 @@ call venv\Scripts\activate.bat
 pip install -r requirements.txt --quiet
 echo [OK] Backend dependencies installed
 
+REM Add this after "Backend dependencies installed"
+if not exist ".env" (
+    echo Creating backend .env...
+    for /f %%i in ('python -c "import secrets; print(secrets.token_hex(32))"') do set SECRET=%%i
+    echo DATABASE_URL=sqlite:///./restaurant.db> .env
+    echo SECRET_KEY=%SECRET%>> .env
+    echo [OK] Backend .env created with secret key
+) else (
+    echo [OK] Backend .env already exists
+)
+
 echo.
 echo Setting up frontend...
 cd /d "%~dp0frontend"
@@ -48,13 +59,9 @@ echo [OK] Frontend dependencies installed
 REM Create .env if it doesn't exist
 if not exist ".env" (
     echo.
-    echo IMPORTANT: You need to create a .env file in the frontend folder.
-    echo Create a file called .env with this content:
-    echo VITE_API_URL=http://YOUR_PC_IP:8000
-    echo.
-    echo To find your IP: open CMD and type 'ipconfig'
-    echo Look for 'IPv4 Address' under your network adapter
-    echo.
+    set /p USER_IP="Enter your local IP address (e.g. 192.168.1.36): "
+    echo VITE_API_URL=http://%USER_IP%:8000> .env
+    echo [OK] Created .env with IP: %USER_IP%
 ) else (
     echo [OK] .env already exists
 )
