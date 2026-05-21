@@ -1,4 +1,10 @@
 @echo off
+REM Run setup if venv doesn't exist (first time install)
+if not exist "%~dp0backend\venv" (
+    echo First time setup detected — running setup...
+    call "%~dp0setup.bat"
+)
+
 echo ================================================
 echo   OrderDesk - Starting...
 echo ================================================
