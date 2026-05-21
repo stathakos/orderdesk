@@ -55,10 +55,10 @@ REM Start backend silently
 start "" cmd /k "cd /d "%~dp0backend" && call venv\Scripts\activate.bat && uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
 REM Wait for backend to start
-timeout /t 3 /nobreak > nul
+ping -n 4 127.0.0.1 > nul
 
 REM Start frontend silently
-start /min "" cmd /c "cd /d "%~dp0frontend" && npm run preview -- --host 0.0.0.0 --port 4173 > nul 2>&1"
+start /min "" cmd /c "cd /d %~dp0frontend && npm run preview -- --host 0.0.0.0 --port 4173 > nul 2>&1"
 
 echo.
 echo Both services starting silently in the background.
