@@ -67,7 +67,7 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
       c.price > 0 ? `${c.name} (+${c.price.toFixed(2)}€)` : c.name
     );
 
-    const finalPrice = sidebarProduct.price + sizeExtra + custsExtraPrice;
+    const finalPrice = (selectedSize?.base_price > 0 ? selectedSize.base_price : sidebarProduct.price + (selectedSize?.price_change || 0)) + custsExtraPrice;
 
     // Include size in product name if selected
     const productName = selectedSize
@@ -267,7 +267,7 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                     <div className="d-flex flex-wrap gap-1 mb-2">
                       {sidebarProduct.category.sizes.map((size) => {
                         const isSelected = selectedSize?.name === size.name;
-                        const finalPrice = sidebarProduct.price + (size.price_change || 0);
+                        const finalPrice = size.base_price > 0 ? size.base_price : sidebarProduct.price + (size.price_change || 0);
                         return (
                           <button
                             key={size.name}
@@ -388,7 +388,7 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                 <div className="mt-2 pt-2 border-top d-flex justify-content-between align-items-center mb-2">
                   <span className="fw-semibold small">Total:</span>
                   <span className="fw-bold text-primary">
-                    {(sidebarProduct.price + (selectedSize?.price_change || 0) + extraPrice).toFixed(2)} €
+                    {((selectedSize?.base_price > 0 ? selectedSize.base_price : sidebarProduct.price + (selectedSize?.price_change || 0)) + extraPrice).toFixed(2)} €
                   </span>
                 </div>
 
