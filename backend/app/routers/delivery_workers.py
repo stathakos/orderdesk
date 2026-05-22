@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from .. import models, schemas
 from ..dependencies import get_db, get_current_user, require_manager
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 router = APIRouter(prefix="/delivery-workers", tags=["Delivery Workers"])
 
@@ -45,7 +46,7 @@ def create_delivery_worker(
         name=worker_data.name,
         phone=worker_data.phone,
         is_active=True,
-        created_at=datetime.now(timezone(timedelta(hours=2))),
+        created_at=datetime.now(ZoneInfo("Europe/Athens")),
     )
     db.add(worker)
     db.commit()
@@ -115,7 +116,7 @@ def get_worker_shift_summary(
         raise HTTPException(status_code=404, detail="Delivery worker not found")
 
     # Today's date range in local time (UTC+2)
-    tz = timezone(timedelta(hours=2))
+    tz = ZoneInfo("Europe/Athens")
     now = datetime.now(tz)
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_day = now.replace(hour=23, minute=59, second=59, microsecond=999999)
