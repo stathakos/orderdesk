@@ -24,7 +24,7 @@ export default function MenuManager() {
   const [categoryForm, setCategoryForm] = useState(EMPTY_CATEGORY);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [newCustomization, setNewCustomization] = useState({ name: "", price: "", type: "multi" });
-  const [newSize, setNewSize] = useState({ name: "", price_change: "", base_price: "" });
+  const [newSize, setNewSize] = useState({ name: "", price_change: "", base_price: "", custom_base_price: "" });
 
   // Product form
   const [productForm, setProductForm] = useState(EMPTY_PRODUCT);
@@ -107,10 +107,11 @@ export default function MenuManager() {
           name: newSize.name.trim(), 
           price_change: parseFloat(newSize.price_change) || 0,
           base_price: parseFloat(newSize.base_price) || 0, 
+          custom_base_price: parseFloat(newSize.custom_base_price) || 0,
         },
       ],
     }));
-    setNewSize({ name: "", price_change: "", base_price: "" });
+    setNewSize({ name: "", price_change: "", base_price: "", custom_base_price: "" });
   }
 
   function removeCustomizationFromForm(index) {
@@ -331,12 +332,18 @@ export default function MenuManager() {
         </div>
         {/* Sizes */}
         <label className="form-label small fw-semibold">Sizes <span className="text-muted fw-normal">(optional)</span></label>
-        <small className="text-muted d-block mb-2">Price change relative to the product's base price. Use negative for smaller sizes.</small>
+        <small className="text-muted d-block mb-2">
+          {/* Price change relative to the product's base price. Use negative for smaller sizes. */}
+          <strong>+/- €</strong>: relative to product price. 
+          <strong>Flat €</strong>: fixed price for pre-made (0 = use product price). 
+          <strong>Custom €</strong>: base price for custom pizzas.
+        </small>
         {categoryForm.sizes.map((s, i) => (
           <div key={i} className="d-flex align-items-center gap-2 mb-1">
             <span className="badge bg-primary">{s.name}</span>
             <span className="text-muted small">{s.price_change >= 0 ? `+${s.price_change.toFixed(2)}` : s.price_change.toFixed(2)}€</span>
-            <span className="text-muted small">custom base: {(s.base_price || 0).toFixed(2)}€</span>
+            <span className="text-muted small">flat: {(s.base_price || 0).toFixed(2)}€</span>
+            <span className="text-muted small">custom: {(s.custom_base_price || 0).toFixed(2)}€</span>
             <button type="button" className="btn btn-sm btn-outline-danger ms-auto"
               onClick={() => setCategoryForm((p) => ({
                 ...p,
@@ -351,9 +358,12 @@ export default function MenuManager() {
           <input className="form-control form-control-sm" placeholder="+/- €" type="number"
             step="0.50" value={newSize.price_change}
             onChange={(e) => setNewSize((p) => ({ ...p, price_change: e.target.value }))} />
-          <input className="form-control form-control-sm" placeholder="Custom base €" type="number"
+          <input className="form-control form-control-sm" placeholder="Flat €" type="number"
             step="0.50" min="0" value={newSize.base_price}
             onChange={(e) => setNewSize((p) => ({ ...p, base_price: e.target.value }))} />
+          <input className="form-control form-control-sm" placeholder="Custom €" type="number"
+            step="0.50" min="0" value={newSize.custom_base_price}
+            onChange={(e) => setNewSize((p) => ({ ...p, custom_base_price: e.target.value }))} />
           <button type="button" className="btn btn-sm btn-outline-primary text-nowrap"
             onClick={addSizeToForm}>Add</button>
         </div>
