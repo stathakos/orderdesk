@@ -38,6 +38,49 @@ const STATUS_BADGE = {
   cancelled: "danger",
 };
 
+function OrderTimer({ createdAt, status, assignedTo }) {
+  const [elapsed, setElapsed] = useState(0); // in seconds
+
+  useEffect(() => {
+    // Don't run if order is done or assigned
+    if (["ready", "delivered", "cancelled"].includes(status) || assignedTo) return;
+
+    function tick() {
+      const created = new Date(createdAt + "Z"); // always treat as UTC
+      const now = new Date();
+      const diff = Math.floor((now.getTime() - created.getTime()) / 1000);
+      setElapsed(Math.max(0, diff));
+    }
+
+    tick(); // run immediately
+    const interval = setInterval(tick, 30000); // update every half a minute
+    return () => clearInterval(interval);
+  }, [createdAt, status, assignedTo]);
+
+  // Hide when done or assigned
+  if (["ready", "delivered", "cancelled"].includes(status) || assignedTo) return null;
+
+  const minutes = Math.floor(elapsed / 60);
+  const hours = Math.floor(minutes / 60);
+  const displayMinutes = minutes % 60;
+
+  const label = hours > 0
+    ? `${hours}h ${displayMinutes}m`
+    : `${minutes}m`;
+
+  const color = minutes >= 45
+    ? "danger"
+    : minutes >= 30
+    ? "warning"
+    : "success";
+
+  return (
+    <span className={`badge bg-${color}`} title="Time since order was placed">
+      ⏱ {label}
+    </span>
+  );
+}
+
 export default function OrdersList() {
   useWatermark("/icons/order.png");
 
@@ -447,7 +490,14 @@ export default function OrdersList() {
                         </button>
                       </td>
                       <td>
-                        <div className="d-flex gap-1">
+                        <div className="text-center mb-1">
+                          <OrderTimer 
+                            createdAt={order.created_at} 
+                            status={order.status}
+                            assignedTo={order.assigned_to}
+                          />
+                        </div>
+                        <div className="d-flex gap-1 mt-1">
                           <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
                             Edit
                           </button>
@@ -574,7 +624,14 @@ export default function OrdersList() {
                   )}
  
                   {/* Actions */}
-                  <div className="d-flex gap-2">
+                  <div className="text-center mb-1">
+                    <OrderTimer 
+                      createdAt={order.created_at}
+                      status={order.status}
+                      assignedTo={order.assigned_to}
+                    />
+                  </div>
+                  <div className="d-flex gap-2 mt-1">
                     <button
                       className="btn btn-sm btn-outline-secondary flex-grow-1"
                       onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}

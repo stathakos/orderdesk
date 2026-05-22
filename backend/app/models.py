@@ -12,7 +12,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from .database import Base
 import enum
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 # ------------------------------------
 # Enums
@@ -62,7 +62,7 @@ class User(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone(timedelta(hours=2))),
+        default=lambda: datetime.now(timezone.utc),
     )
 
 
@@ -75,7 +75,7 @@ class DeliveryWorker(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone(timedelta(hours=2))),
+        default=lambda: datetime.now(timezone.utc),
     )
 
     orders = relationship("Order", back_populates="assigned_worker")
@@ -149,7 +149,7 @@ class Order(Base):
     assigned_to = Column(Integer, ForeignKey("delivery_workers.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone(timedelta(hours=2))),
+        default=lambda: datetime.now(timezone.utc),
     )
     is_archived = Column(Boolean, default=False, nullable=False)
     daily_sequence = Column(Integer, nullable=True)

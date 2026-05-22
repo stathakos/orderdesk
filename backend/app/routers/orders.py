@@ -1,8 +1,9 @@
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from .. import models, schemas
 from ..dependencies import get_db, get_current_user, require_admin, require_manager
+from zoneinfo import ZoneInfo
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
@@ -91,11 +92,11 @@ def get_orders(
     if status is not None:
         query = query.filter(models.Order.status == status)
     if date_from is not None:
-        tz = timezone(timedelta(hours=2))
+        tz = ZoneInfo("Europe/Athens")
         dt_from = datetime.combine(date_from, datetime.min.time()).replace(tzinfo=tz)
         query = query.filter(models.Order.created_at >= dt_from)
     if date_to is not None:
-        tz = timezone(timedelta(hours=2))
+        tz = ZoneInfo("Europe/Athens")
         dt_to = datetime.combine(date_to, datetime.max.time()).replace(tzinfo=tz)
         query = query.filter(models.Order.created_at <= dt_to)
 
@@ -112,7 +113,7 @@ def close_shift(
     _: models.User = Depends(require_manager),
 ):
     """Archive all of today's orders and return a summary."""
-    tz = timezone(timedelta(hours=2))
+    tz = ZoneInfo("Europe/Athens")
     now = datetime.now(tz)
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_day = now.replace(hour=23, minute=59, second=59, microsecond=999999)
@@ -157,7 +158,7 @@ def purge_old_orders(
     _: models.User = Depends(require_admin),
 ):
     """Delete all archived orders older than 30 days."""
-    tz = timezone(timedelta(hours=2))
+    tz = ZoneInfo("Europe/Athens")
     now = datetime.now(tz)
     cutoff = now - timedelta(days=30)
 
@@ -208,7 +209,7 @@ def create_order(
         raise HTTPException(status_code=404, detail="Customer not found")
 
     # Calculate daily sequence
-    tz = timezone(timedelta(hours=2))
+    tz = ZoneInfo("Europe/Athens")
     now = datetime.now(tz)
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_day = now.replace(hour=23, minute=59, second=59, microsecond=999999)
