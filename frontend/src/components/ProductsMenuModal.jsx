@@ -448,20 +448,34 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
 // Custom Pizza Modal
 // ------------------------------------
 function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
-  const [selectedIngredients, setSelectedIngredients] = useState([]);
   const CUSTOM_PIZZA_SIZES = sizes.length > 0
     ? sizes.map((s, i) => ({
         name: s.name,
         // Use price_change as offset from a manual base, or define fixed prices
-        basePrice: s.custom_base_price || s.base_price || 0
+        basePrice: s.custom_base_price || s.base_price || 0,
+        threeIngExtra: s.three_ing_extra || 0,
       }))
-    : [ { name: "Atomic", basePrice: 6.00 },
-        { name: "Classic", basePrice: 8.00 },
-        { name: "Family", basePrice: 10.00 }
+    : [ 
+        { name: "Atomic", basePrice: 6.50, threeIngExtra: 0.50 },
+        { name: "Classic", basePrice: 8.00, threeIngExtra: 0.60 },
+        { name: "Family", basePrice: 11.00, threeIngExtra: 1.00 },
       ];
-      
+
   const [selectedSize, setSelectedSize] = useState(CUSTOM_PIZZA_SIZES[1] ?? CUSTOM_PIZZA_SIZES[0]);
-  const [basePrice, setBasePrice] = useState(selectedSize.basePrice.toString());
+    
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+
+  const freeCount = selectedIngredients.filter((i) => i.isFree).length;
+
+  const dynamicBase = freeCount >= 3
+    ? selectedSize.basePrice + selectedSize.threeIngExtra
+    : selectedSize.basePrice;
+
+  console.log("freeCount:", freeCount, "dynamicBase:", dynamicBase, "selectedSize:", selectedSize);
+
+  const [manualOverride, setManualOverride] = useState(false);
+  const [overridePrice, setOverridePrice] = useState("");
+  const effectiveBase = manualOverride ? parseFloat(overridePrice) || 0 : dynamicBase;
 
   function toggleIngredient(ing) {
     setSelectedIngredients((prev) => {
@@ -498,12 +512,11 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
     );
   }
 
-
   const extraPrice = selectedIngredients
     .filter((i) => !i.isFree)
     .reduce((sum, i) => sum + i.price, 0);
 
-  const totalPrice = parseFloat(basePrice) + extraPrice;
+  const totalPrice = effectiveBase + extraPrice;
 
   function handleConfirm() {
     if (selectedIngredients.length === 0) {
@@ -577,30 +590,58 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
                   className={`btn btn-sm ${selectedSize?.name === size.name ? "btn-danger" : "btn-outline-danger"}`}
                   onClick={() => {
                     setSelectedSize(size);
-                    setBasePrice(size.basePrice.toString());
+                    setManualOverride(false);  // reset override on size change
+                    setOverridePrice("");
                   }}
                 >
                   {size.name}
                   <span className="ms-1 fw-bold" style={{ fontSize: "0.75rem" }}>
                     {size.basePrice.toFixed(2)}€
+                    {/* {size.threeIngExtra > 0 && (
+                      <span className="text-warning ms-1">/ {(size.basePrice + size.threeIngExtra).toFixed(2)}€</span>
+                    )} */}
                   </span>
                 </button>
               ))}
             </div>
+            {/* Dynamic hint below buttons */}
+            {selectedSize.threeIngExtra > 0 && (
+              <small className="text-muted mt-1 d-block">
+                2 ingredients: <strong>{selectedSize.basePrice.toFixed(2)}€</strong> · 
+                3 ingredients: <strong>{(selectedSize.basePrice + selectedSize.threeIngExtra).toFixed(2)}€</strong>
+              </small>
+            )}
           </div>
         )}
 
         {/* Base price - manual override */}
         <div className="px-3 pt-3 pb-2 border-bottom">
-          <label className="form-label small fw-semibold">Base Price (€) <span className="text-muted fw-normal small">— auto-set by size, override if needed</span></label>
+          <label className="form-label small fw-semibold">Base Price (€) 
+            <span className="text-muted fw-normal small ms-2">
+              — {freeCount >= 3 ? "3-ingredient price" : "2-ingredient price"}
+            </span>
+          </label>
+          {/* Dynamic price indicator */}
+          <div className="text-danger fw-bold mb-1" style={{ fontSize: "1.1rem" }}>
+            {dynamicBase.toFixed(2)} €
+            {freeCount >= 3 && selectedSize.threeIngExtra > 0 && (
+              <small className="text-muted ms-2" style={{ fontSize: "0.75rem" }}>
+                ({selectedSize.basePrice.toFixed(2)} + {selectedSize.threeIngExtra.toFixed(2)} surcharge)
+              </small>
+            )}
+          </div>
+          <label className="form-label small text-muted mb-1">Override if needed:</label>
           <input
             type="number"
             className="form-control form-control-sm"
             style={{ maxWidth: 120 }}
-            value={basePrice}
+            value={manualOverride ? overridePrice : dynamicBase.toFixed(2)}
             step="0.50"
             min="0"
-            onChange={(e) => setBasePrice(e.target.value)}
+            onChange={(e) => {
+              setManualOverride(true);
+              setOverridePrice(e.target.value);
+            }}
           />
         </div>
 
