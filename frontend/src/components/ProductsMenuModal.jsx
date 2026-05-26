@@ -471,8 +471,6 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
     ? selectedSize.basePrice + selectedSize.threeIngExtra
     : selectedSize.basePrice;
 
-  console.log("freeCount:", freeCount, "dynamicBase:", dynamicBase, "selectedSize:", selectedSize);
-
   const [manualOverride, setManualOverride] = useState(false);
   const [overridePrice, setOverridePrice] = useState("");
   const effectiveBase = manualOverride ? parseFloat(overridePrice) || 0 : dynamicBase;
