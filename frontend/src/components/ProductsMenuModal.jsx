@@ -453,12 +453,13 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
         name: s.name,
         // Use price_change as offset from a manual base, or define fixed prices
         basePrice: s.custom_base_price || s.base_price || 0,
+        twoIngExtra: s.two_ing_extra || 0,
         threeIngExtra: s.three_ing_extra || 0,
       }))
     : [ 
-        { name: "Atomic", basePrice: 6.50, threeIngExtra: 0.50 },
-        { name: "Classic", basePrice: 8.00, threeIngExtra: 0.60 },
-        { name: "Family", basePrice: 11.00, threeIngExtra: 1.00 },
+        { name: "Atomic", basePrice: 6.50, twoIngExtra: 0.50, threeIngExtra: 0.50 },
+        { name: "Classic", basePrice: 8.00, twoIngExtra: 0.60, threeIngExtra: 0.60 },
+        { name: "Family", basePrice: 11.00, twoIngExtra: 1.00, threeIngExtra: 1.00 },
       ];
 
   const [selectedSize, setSelectedSize] = useState(CUSTOM_PIZZA_SIZES[1] ?? CUSTOM_PIZZA_SIZES[0]);
@@ -467,9 +468,12 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
 
   const freeCount = selectedIngredients.filter((i) => i.isFree).length;
 
-  const dynamicBase = freeCount >= 3
-    ? selectedSize.basePrice + selectedSize.threeIngExtra
-    : selectedSize.basePrice;
+  const dynamicBase = 
+    freeCount >= 3
+      ? selectedSize.basePrice + selectedSize.twoIngExtra + selectedSize.threeIngExtra
+      : freeCount >= 2
+        ? selectedSize.basePrice + selectedSize.twoIngExtra
+        : selectedSize.basePrice;
 
   const [manualOverride, setManualOverride] = useState(false);
   const [overridePrice, setOverridePrice] = useState("");
@@ -539,6 +543,11 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
 
   }
 
+  const ingExtra =
+    freeCount >= 3
+      ? selectedSize.twoIngExtra + selectedSize.threeIngExtra
+      : selectedSize.twoIngExtra;
+
   return createPortal(
     <>
       {/* Backdrop */}
@@ -605,8 +614,9 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
             {/* Dynamic hint below buttons */}
             {selectedSize.threeIngExtra > 0 && (
               <small className="text-muted mt-1 d-block">
-                2 ingredients: <strong>{selectedSize.basePrice.toFixed(2)}€</strong> · 
-                3 ingredients: <strong>{(selectedSize.basePrice + selectedSize.threeIngExtra).toFixed(2)}€</strong>
+                1 ingredient: <strong>{selectedSize.basePrice.toFixed(2)}€</strong> · 
+                2 ingredients: <strong>{(selectedSize.basePrice + selectedSize.twoIngExtra).toFixed(2)}€</strong> ·
+                3 ingredients: <strong>{(selectedSize.basePrice + selectedSize.twoIngExtra + selectedSize.threeIngExtra).toFixed(2)}€</strong>
               </small>
             )}
           </div>
@@ -616,18 +626,33 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
         <div className="px-3 pt-3 pb-2 border-bottom">
           <label className="form-label small fw-semibold">Base Price (€) 
             <span className="text-muted fw-normal small ms-2">
-              — {freeCount >= 3 ? "3-ingredient price" : "2-ingredient price"}
+              — {
+              freeCount >= 3 
+                ? "3-ingredient price" 
+                : freeCount >= 2
+                  ? "2-ingredient price" 
+                  : "1-ingredient price"
+              }
             </span>
           </label>
-          {/* Dynamic price indicator */}
+          {/* Dynamic price indicator for 2 or 3 ingredients */}
           <div className="text-danger fw-bold mb-1" style={{ fontSize: "1.1rem" }}>
+            {dynamicBase.toFixed(2)} €
+            {freeCount >= 2 && ingExtra > 0 && (
+              <small className="text-muted ms-2" style={{ fontSize: "0.75rem" }}>
+                ({selectedSize.basePrice.toFixed(2)} + {ingExtra.toFixed(2)} surcharge)
+              </small>
+            )}
+          </div>
+          {/* Dynamic price indicator for 3-ing*/}
+          {/* <div className="text-danger fw-bold mb-1" style={{ fontSize: "1.1rem" }}>
             {dynamicBase.toFixed(2)} €
             {freeCount >= 3 && selectedSize.threeIngExtra > 0 && (
               <small className="text-muted ms-2" style={{ fontSize: "0.75rem" }}>
                 ({selectedSize.basePrice.toFixed(2)} + {selectedSize.threeIngExtra.toFixed(2)} surcharge)
               </small>
             )}
-          </div>
+          </div> */}
           <label className="form-label small text-muted mb-1">Override if needed:</label>
           <input
             type="number"
