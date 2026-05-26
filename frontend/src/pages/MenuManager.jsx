@@ -24,7 +24,7 @@ export default function MenuManager() {
   const [categoryForm, setCategoryForm] = useState(EMPTY_CATEGORY);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [newCustomization, setNewCustomization] = useState({ name: "", price: "", type: "multi" });
-  const [newSize, setNewSize] = useState({ name: "", price_change: "", base_price: "", custom_base_price: "" });
+  const [newSize, setNewSize] = useState({ name: "", price_change: "", base_price: "", custom_base_price: "", three_ing_extra: "" });
 
   // Product form
   const [productForm, setProductForm] = useState(EMPTY_PRODUCT);
@@ -81,7 +81,7 @@ export default function MenuManager() {
     setEditingCategoryId(null);
     setCategoryForm(EMPTY_CATEGORY);
     setNewCustomization({ name: "", price: "", type: "multi" });
-    setNewSize({ name: "", price_change: "", base_price: "" });
+    setNewSize({ name: "", price_change: "", base_price: "", custom_base_price: "", three_ing_extra: "" });
     setShowForm(false);
   }
 
@@ -108,10 +108,11 @@ export default function MenuManager() {
           price_change: parseFloat(newSize.price_change) || 0,
           base_price: parseFloat(newSize.base_price) || 0, 
           custom_base_price: parseFloat(newSize.custom_base_price) || 0,
+          three_ing_extra: parseFloat(newSize.three_ing_extra) || 0,
         },
       ],
     }));
-    setNewSize({ name: "", price_change: "", base_price: "", custom_base_price: "" });
+    setNewSize({ name: "", price_change: "", base_price: "", custom_base_price: "", three_ing_extra: "" });
   }
 
   function removeCustomizationFromForm(index) {
@@ -344,6 +345,7 @@ export default function MenuManager() {
             <span className="text-muted small">{s.price_change >= 0 ? `+${s.price_change.toFixed(2)}` : s.price_change.toFixed(2)}€</span>
             <span className="text-muted small">flat: {(s.base_price || 0).toFixed(2)}€</span>
             <span className="text-muted small">custom: {(s.custom_base_price || 0).toFixed(2)}€</span>
+            <span className="text-muted small">3-ing: +{(s.three_ing_extra || 0).toFixed(2)}€</span>
             <button type="button" className="btn btn-sm btn-outline-danger ms-auto"
               onClick={() => setCategoryForm((p) => ({
                 ...p,
@@ -364,6 +366,9 @@ export default function MenuManager() {
           <input className="form-control form-control-sm" placeholder="Custom €" type="number"
             step="0.50" min="0" value={newSize.custom_base_price}
             onChange={(e) => setNewSize((p) => ({ ...p, custom_base_price: e.target.value }))} />
+          <input className="form-control form-control-sm" placeholder="3-ing + €" type="number"
+            step="0.10" min="0" value={newSize.three_ing_extra}
+            onChange={(e) => setNewSize((p) => ({ ...p, three_ing_extra: e.target.value }))} />
           <button type="button" className="btn btn-sm btn-outline-primary text-nowrap"
             onClick={addSizeToForm}>Add</button>
         </div>
@@ -477,19 +482,20 @@ export default function MenuManager() {
         <li className="nav-item">
           <button className={`nav-link ${activeTab === "categories" ? "active" : ""}`}
             onClick={() => { setActiveTab("categories"); cancelCategoryEdit(); cancelProductEdit(); }}>
-            Categories
+            📋 Categories 🎛️
           </button>
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === "products" ? "active" : ""}`}
             onClick={() => { setActiveTab("products"); cancelCategoryEdit(); cancelProductEdit(); }}>
-            Products
+            🍕 🍝 Products 🥪 🍲
           </button>
         </li>
         <li className="nav-item">
           <button className={`nav-link ${activeTab === "ingredients" ? "active" : ""}`}
             onClick={() => { setActiveTab("ingredients"); cancelCategoryEdit(); cancelProductEdit(); }}>
-            🍕 Ingredients
+             🧀 🥓 🍅 Ingredients 🫑 🍗 🥫
+             {/* 🍕 */}
           </button>
         </li>
       </ul>

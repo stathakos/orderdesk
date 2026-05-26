@@ -67,7 +67,9 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
       c.price > 0 ? `${c.name} (+${c.price.toFixed(2)}€)` : c.name
     );
 
-    const finalPrice = (selectedSize?.base_price > 0 ? selectedSize.base_price : sidebarProduct.price + (selectedSize?.price_change || 0)) + custsExtraPrice;
+    const finalPrice = (selectedSize?.base_price > 0 
+      ? selectedSize.base_price 
+      : sidebarProduct.price + (selectedSize?.price_change || 0)) + custsExtraPrice;
 
     // Include size in product name if selected
     const productName = selectedSize
@@ -267,7 +269,9 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                     <div className="d-flex flex-wrap gap-1 mb-2">
                       {sidebarProduct.category.sizes.map((size) => {
                         const isSelected = selectedSize?.name === size.name;
-                        const finalPrice = size.base_price > 0 ? size.base_price : sidebarProduct.price + (size.price_change || 0);
+                        const finalPrice = size.base_price > 0 
+                          ? size.base_price 
+                          : sidebarProduct.price + (size.price_change || 0);
                         return (
                           <button
                             key={size.name}
@@ -388,7 +392,9 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                 <div className="mt-2 pt-2 border-top d-flex justify-content-between align-items-center mb-2">
                   <span className="fw-semibold small">Total:</span>
                   <span className="fw-bold text-primary">
-                    {((selectedSize?.base_price > 0 ? selectedSize.base_price : sidebarProduct.price + (selectedSize?.price_change || 0)) + extraPrice).toFixed(2)} €
+                    {((selectedSize?.base_price > 0 
+                      ? selectedSize.base_price 
+                      : sidebarProduct.price + (selectedSize?.price_change || 0)) + extraPrice).toFixed(2)} €
                   </span>
                 </div>
 
@@ -442,22 +448,35 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
 // Custom Pizza Modal
 // ------------------------------------
 function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
-  const [selectedIngredients, setSelectedIngredients] = useState([]);
   const CUSTOM_PIZZA_SIZES = sizes.length > 0
     ? sizes.map((s, i) => ({
         name: s.name,
-        basePrice: s.custom_base_price || 0
+        // Use price_change as offset from a manual base, or define fixed prices
+        basePrice: s.custom_base_price || s.base_price || 0,
+        threeIngExtra: s.three_ing_extra || 0,
       }))
-    : [ { name: "Atomic", basePrice: 7.60 },
-        { name: "Classic", basePrice: 9.00 },
-        { name: "Family", basePrice: 14.00 },
+    : [ 
+        { name: "Atomic", basePrice: 6.50, threeIngExtra: 0.50 },
+        { name: "Classic", basePrice: 8.00, threeIngExtra: 0.60 },
+        { name: "Family", basePrice: 11.00, threeIngExtra: 1.00 },
       ];
-      
+
   const [selectedSize, setSelectedSize] = useState(CUSTOM_PIZZA_SIZES[1] ?? CUSTOM_PIZZA_SIZES[0]);
-  // const [basePrice, setBasePrice] = useState(selectedSize.basePrice.toString());
+    
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+
+  const freeCount = selectedIngredients.filter((i) => i.isFree).length;
+
+  const dynamicBase = freeCount >= 3
+    ? selectedSize.basePrice + selectedSize.threeIngExtra
+    : selectedSize.basePrice;
+
+  const [manualOverride, setManualOverride] = useState(false);
+  const [overridePrice, setOverridePrice] = useState("");
+  const effectiveBase = manualOverride ? parseFloat(overridePrice) || 0 : dynamicBase;
 
   function toggleIngredient(ing) {
-    setSelectedIngredients((prev) =>{
+    setSelectedIngredients((prev) => {
       const exists = prev.find((i) => i.id === ing.id);
       if (exists) {
         // Remove it and recalculate free slots
@@ -495,7 +514,7 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
     .filter((i) => !i.isFree)
     .reduce((sum, i) => sum + i.price, 0);
 
-  const totalPrice = selectedSize.basePrice + extraPrice;
+  const totalPrice = effectiveBase + extraPrice;
 
   function handleConfirm() {
     if (selectedIngredients.length === 0) {
@@ -558,53 +577,99 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
         </div>
 
         {/* Size selector */}
-        <div className="px-3 pt-3 pb-2 border-bottom">
-          <label className="form-label small fw-semibold">Size</label>
-          <div className="d-flex flex-wrap gap-2">
-            {CUSTOM_PIZZA_SIZES.map((size) => (
-              <button
-                key={size.name}
-                type="button"
-                className={`btn btn-sm ${selectedSize?.name === size.name ? "btn-danger" : "btn-outline-danger"}`}
-                onClick={() => setSelectedSize(size)}
-              >
-                {size.name}
-                <span className="ms-1 fw-bold" style={{ fontSize: "0.75rem" }}>
-                  {size.basePrice.toFixed(2)}€
-                </span>
-              </button>
-            ))}
+        {sizes.length > 0 && (
+          <div className="px-3 pt-3 pb-2 border-bottom">
+            <label className="form-label small fw-semibold">Size</label>
+            <div className="d-flex flex-wrap gap-2">
+              {CUSTOM_PIZZA_SIZES.map((size) => (
+                <button
+                  key={size.name}
+                  type="button"
+                  className={`btn btn-sm ${selectedSize?.name === size.name ? "btn-danger" : "btn-outline-danger"}`}
+                  onClick={() => {
+                    setSelectedSize(size);
+                    setManualOverride(false);  // reset override on size change
+                    setOverridePrice("");
+                  }}
+                >
+                  {size.name}
+                  <span className="ms-1 fw-bold" style={{ fontSize: "0.75rem" }}>
+                    {size.basePrice.toFixed(2)}€
+                    {/* {size.threeIngExtra > 0 && (
+                      <span className="text-warning ms-1">/ {(size.basePrice + size.threeIngExtra).toFixed(2)}€</span>
+                    )} */}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {/* Dynamic hint below buttons */}
+            {selectedSize.threeIngExtra > 0 && (
+              <small className="text-muted mt-1 d-block">
+                2 ingredients: <strong>{selectedSize.basePrice.toFixed(2)}€</strong> · 
+                3 ingredients: <strong>{(selectedSize.basePrice + selectedSize.threeIngExtra).toFixed(2)}€</strong>
+              </small>
+            )}
           </div>
+        )}
+
+        {/* Base price - manual override */}
+        <div className="px-3 pt-3 pb-2 border-bottom">
+          <label className="form-label small fw-semibold">Base Price (€) 
+            <span className="text-muted fw-normal small ms-2">
+              — {freeCount >= 3 ? "3-ingredient price" : "2-ingredient price"}
+            </span>
+          </label>
+          {/* Dynamic price indicator */}
+          <div className="text-danger fw-bold mb-1" style={{ fontSize: "1.1rem" }}>
+            {dynamicBase.toFixed(2)} €
+            {freeCount >= 3 && selectedSize.threeIngExtra > 0 && (
+              <small className="text-muted ms-2" style={{ fontSize: "0.75rem" }}>
+                ({selectedSize.basePrice.toFixed(2)} + {selectedSize.threeIngExtra.toFixed(2)} surcharge)
+              </small>
+            )}
+          </div>
+          <label className="form-label small text-muted mb-1">Override if needed:</label>
+          <input
+            type="number"
+            className="form-control form-control-sm"
+            style={{ maxWidth: 120 }}
+            value={manualOverride ? overridePrice : dynamicBase.toFixed(2)}
+            step="0.50"
+            min="0"
+            onChange={(e) => {
+              setManualOverride(true);
+              setOverridePrice(e.target.value);
+            }}
+          />
         </div>
 
         {/* Ingredients grid */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "1rem" }}>
+                <div style={{ overflowY: "auto", flex: 1, padding: "1rem" }}>
           <p className="small text-muted mb-2">
             Tap to add · Toggle <span className="badge bg-success">FREE</span> / <span className="badge bg-danger">CHARGED</span> for each ingredient
           </p>
           {ingredients.length === 0 ? (
-            <p className="text-muted text-center">No ingredients available.</p>
+            <p className="text-muted text-center">No ingredients available. Add them in Menu Manager.</p>
           ) : (
             <div className="row g-2">
               {ingredients.map((ing) => {
-                const selected = selectedIngredients.find((i) => i.id === ing.id);
-                const isSelected = !!selected;
-                const isFree = selected?.isFree ?? false;
+                const isSelected = !!selectedIngredients.find((i) => i.id === ing.id);
+                const isFree = selectedIngredients.find((i) => i.id === ing.id)?.isFree ?? false;
                 return (
                   <div key={ing.id} className="col-6 col-sm-4">
                     <div
                       className={`card text-center h-100 ${
-                        isSelected
+                        isSelected 
                           ? isFree
                             ? "border-success bg-success bg-opacity-10"
-                            : "border-danger bg-danger bg-opacity-10"
+                            : "border-danger bg-danger bg-opacity-10" 
                           : ""
                       }`}
                       onClick={() => toggleIngredient(ing)}
                       style={{ cursor: "pointer", transition: "all 0.15s" }}
                     >
                       <div className="card-body p-2">
-                        <div style={{ fontSize: "1.2rem" }}>🧀</div>
+                        <div style={{ fontSize: "1.2rem" }}>🧀 🥓</div>
                         <div className="fw-semibold" style={{ fontSize: "0.85rem" }}>{ing.name}</div>
                         <div className="text-muted" style={{ fontSize: "0.75rem" }}>
                           {ing.price > 0 ? `+${ing.price.toFixed(2)} €` : "Included"}
@@ -631,54 +696,6 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
             </div>
           )}
         </div>
-
-        {/* Base price - manual override */}
-        {/*
-        <div className="px-3 pt-3 pb-2 border-bottom">
-          <label className="form-label small fw-semibold">Base Price (€) <span className="text-muted fw-normal small">— auto-set by size, override if needed</span></label>
-          <input
-            type="number"
-            className="form-control form-control-sm"
-            style={{ maxWidth: 120 }}
-            value={basePrice}
-            step="0.50"
-            min="0"
-            onChange={(e) => setBasePrice(e.target.value)}
-          />
-        </div>
-        */}
-
-        {/* Ingredients grid */}
-        {/*
-        <div style={{ overflowY: "auto", flex: 1, padding: "1rem" }}>
-          {ingredients.length === 0 ? (
-            <p className="text-muted text-center">No ingredients available. Add them in Menu Manager.</p>
-          ) : (
-            <div className="row g-2">
-              {ingredients.map((ing) => {
-                const isSelected = !!selectedIngredients.find((i) => i.id === ing.id);
-                return (
-                  <div key={ing.id} className="col-6 col-sm-4">
-                    <div
-                      className={`card text-center h-100 ${isSelected ? "border-danger bg-danger bg-opacity-10" : ""}`}
-                      onClick={() => toggleIngredient(ing)}
-                      style={{ cursor: "pointer", transition: "all 0.15s" }}
-                    >
-                      <div className="card-body p-2">
-                        <div style={{ fontSize: "1.2rem" }}>🧀</div>
-                        <div className="fw-semibold" style={{ fontSize: "0.85rem" }}>{ing.name}</div>
-                        <div className="text-muted" style={{ fontSize: "0.75rem" }}>
-                          {ing.price > 0 ? `+${ing.price.toFixed(2)} €` : "Included"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-         */}
 
         {/* Footer */}
         <div className="p-3 border-top">
