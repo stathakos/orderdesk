@@ -67,7 +67,9 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
       c.price > 0 ? `${c.name} (+${c.price.toFixed(2)}€)` : c.name
     );
 
-    const finalPrice = sidebarProduct.price + sizeExtra + custsExtraPrice;
+    const finalPrice = (selectedSize?.base_price > 0 
+      ? selectedSize.base_price 
+      : sidebarProduct.price + (selectedSize?.price_change || 0)) + custsExtraPrice;
 
     // Include size in product name if selected
     const productName = selectedSize
@@ -267,7 +269,9 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                     <div className="d-flex flex-wrap gap-1 mb-2">
                       {sidebarProduct.category.sizes.map((size) => {
                         const isSelected = selectedSize?.name === size.name;
-                        const finalPrice = sidebarProduct.price + (size.price_change || 0);
+                        const finalPrice = size.base_price > 0 
+                          ? size.base_price 
+                          : sidebarProduct.price + (size.price_change || 0);
                         return (
                           <button
                             key={size.name}
@@ -388,7 +392,9 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                 <div className="mt-2 pt-2 border-top d-flex justify-content-between align-items-center mb-2">
                   <span className="fw-semibold small">Total:</span>
                   <span className="fw-bold text-primary">
-                    {(sidebarProduct.price + (selectedSize?.price_change || 0) + extraPrice).toFixed(2)} €
+                    {((selectedSize?.base_price > 0 
+                      ? selectedSize.base_price 
+                      : sidebarProduct.price + (selectedSize?.price_change || 0)) + extraPrice).toFixed(2)} €
                   </span>
                 </div>
 
@@ -447,7 +453,7 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
     ? sizes.map((s, i) => ({
         name: s.name,
         // Use price_change as offset from a manual base, or define fixed prices
-        basePrice: s.base_price || 0
+        basePrice: s.custom_base_price || s.base_price || 0
       }))
     : [ { name: "Atomic", basePrice: 6.00 },
         { name: "Classic", basePrice: 8.00 },
@@ -458,14 +464,45 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
   const [basePrice, setBasePrice] = useState(selectedSize.basePrice.toString());
 
   function toggleIngredient(ing) {
+    setSelectedIngredients((prev) => {
+      const exists = prev.find((i) => i.id === ing.id);
+      if (exists) {
+        // Remove it and recalculate free slots
+        const updated = prev.filter((i) => i.id !== ing.id);
+        return recalculateFree(updated);
+      } else {
+        // Add it
+        const updated = [...prev, { ...ing, isFree: prev.length < 3 }];
+        return recalculateFree(updated);
+      }
+    });
+  }
+
+  function recalculateFree(items) {
+    // Auto-mark first 3 as free, rest as charged
+    // BUT respect manual overrides — if worker toggled, keep their choice
+    return items.map((item, index) => ({
+      ...item,
+      isFree: item.manualOverride ? item.isFree : index < 3
+    }));
+  }
+
+  function toggleFree(ingId) {
+    // Worker manually overrides free/charged
     setSelectedIngredients((prev) =>
-      prev.find((i) => i.id === ing.id)
-        ? prev.filter((i) => i.id !== ing.id)
-        : [...prev, ing]
+      prev.map((i) =>
+        i.id === ingId
+          ? { ...i, isFree: !i.isFree, manualOverride: true }
+          : i
+      )
     );
   }
 
-  const extraPrice = selectedIngredients.reduce((sum, i) => sum + i.price, 0);
+
+  const extraPrice = selectedIngredients
+    .filter((i) => !i.isFree)
+    .reduce((sum, i) => sum + i.price, 0);
+
   const totalPrice = parseFloat(basePrice) + extraPrice;
 
   function handleConfirm() {
@@ -474,10 +511,12 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
       return;
     }
     const customLabels = selectedIngredients.map((i) =>
-      i.price > 0 ? `${i.name} (+${i.price.toFixed(2)}€)` : i.name
+      i.isFree
+        ? i.name
+        : `${i.name} (+${i.price.toFixed(2)}€)`
     );
 
-    const productName = `Make Your Own Pizza (${selectedSize.name})`;
+    const productName = `Custom Pizza (${selectedSize.name})`;
 
     onConfirm([{
       id: null,  
@@ -567,25 +606,49 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
 
         {/* Ingredients grid */}
         <div style={{ overflowY: "auto", flex: 1, padding: "1rem" }}>
+          <p className="small text-muted mb-2">
+            Tap to add · Toggle <span className="badge bg-success">FREE</span> / <span className="badge bg-danger">CHARGED</span> for each ingredient
+          </p>
           {ingredients.length === 0 ? (
             <p className="text-muted text-center">No ingredients available. Add them in Menu Manager.</p>
           ) : (
             <div className="row g-2">
               {ingredients.map((ing) => {
                 const isSelected = !!selectedIngredients.find((i) => i.id === ing.id);
+                const isFree = selectedIngredients.find((i) => i.id === ing.id)?.isFree ?? false;
                 return (
                   <div key={ing.id} className="col-6 col-sm-4">
                     <div
-                      className={`card text-center h-100 ${isSelected ? "border-danger bg-danger bg-opacity-10" : ""}`}
+                      className={`card text-center h-100 ${
+                        isSelected 
+                          ? isFree
+                            ? "border-success bg-success bg-opacity-10"
+                            : "border-danger bg-danger bg-opacity-10" 
+                          : ""
+                      }`}
                       onClick={() => toggleIngredient(ing)}
                       style={{ cursor: "pointer", transition: "all 0.15s" }}
                     >
                       <div className="card-body p-2">
-                        <div style={{ fontSize: "1.2rem" }}>🧀</div>
+                        <div style={{ fontSize: "1.2rem" }}>🧀 🥓</div>
                         <div className="fw-semibold" style={{ fontSize: "0.85rem" }}>{ing.name}</div>
                         <div className="text-muted" style={{ fontSize: "0.75rem" }}>
                           {ing.price > 0 ? `+${ing.price.toFixed(2)} €` : "Included"}
                         </div>
+                        {/* Free/Charged toggle — only show when selected */}
+                        {isSelected && (
+                          <button
+                            type="button"
+                            className={`btn btn-xs mt-1 py-0 px-1 ${isFree ? "btn-success" : "btn-danger"}`}
+                            style={{ fontSize: "0.65rem" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFree(ing.id);
+                            }}
+                          >
+                            {isFree ? "FREE" : `+${ing.price.toFixed(2)}€`}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -599,7 +662,14 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
         <div className="p-3 border-top">
           {selectedIngredients.length > 0 && (
             <div className="small text-muted mb-2">
-              Selected: {selectedIngredients.map((i) => i.name).join(", ")}
+              Selected: {selectedIngredients.map((i) => (
+                <span
+                  key={i.id}
+                  className={`badge me-1 ${i.isFree ? "bg-success" : "bg-danger"}`}
+                >
+                  {i.name}
+                </span>
+              ))}
             </div>
           )}
           <div className="d-flex justify-content-between align-items-center mb-3">
