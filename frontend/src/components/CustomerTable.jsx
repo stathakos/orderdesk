@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomerOrderHistory from "./CustomerOrderHistory";
+import { isManager } from "../services/authStore";
 
 export default function CustomerTable({ customers, onEdit, hasSearched, onDelete }) {
   const navigate = useNavigate();
@@ -26,7 +27,9 @@ export default function CustomerTable({ customers, onEdit, hasSearched, onDelete
               <th>Address</th>
               <th>Floor</th>
               <th>Notes</th>
-              <th>Actions</th>
+              {isManager() && (
+                <th>Actions</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -37,14 +40,18 @@ export default function CustomerTable({ customers, onEdit, hasSearched, onDelete
                 <td>{c.address || <span className="text-muted">—</span>}</td>
                 <td>{c.floor || <span className="text-muted">—</span>}</td>
                 <td>{c.notes || <span className="text-muted">—</span>}</td>
-                <td>
-                  <div className="d-flex gap-1">
-                    <button className="btn btn-outline-info btn-sm" onClick={() => onEdit(c)}>Edit</button>
-                    <button className="btn btn-outline-danger btn-sm" onClick={() => onDelete(c.id)}>Delete</button>
-                    <button className="btn btn-outline-secondary btn-sm" onClick={() => setHistoryCustomer(c)}>History</button>
-                    <button className="btn btn-outline-success btn-sm" onClick={() => navigate(`/orders/new/${c.id}`)}>Order</button>
-                  </div>
-                </td>
+                {isManager() && (
+                  <>
+                    <td>
+                      <div className="d-flex gap-1">
+                        <button className="btn btn-outline-info btn-sm" onClick={() => onEdit(c)}>Edit</button>
+                        <button className="btn btn-outline-danger btn-sm" onClick={() => onDelete(c.id)}>Delete</button>
+                        <button className="btn btn-outline-secondary btn-sm" onClick={() => setHistoryCustomer(c)}>History</button>
+                        <button className="btn btn-outline-success btn-sm" onClick={() => navigate(`/orders/new/${c.id}`)}>Order</button>
+                      </div>
+                    </td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
@@ -81,34 +88,38 @@ export default function CustomerTable({ customers, onEdit, hasSearched, onDelete
 
               {/* Actions */}
               <div className="d-flex gap-2 mt-2">
-                <button
-                  className="btn btn-outline-info btn-sm flex-grow-1"
-                  onClick={() => onEdit(c)}
-                  title="Edit Customer"
-                >
-                  ✏️ 
-                </button>
-                <button 
-                  className="btn btn-outline-secondary btn-sm flex-grow-1" 
-                  onClick={() => setHistoryCustomer(c)}
-                  title="Customer History"
-                >
-                  📋
-                </button>
-                <button
-                  className="btn btn-outline-danger btn-sm flex-grow-1"
-                  onClick={() => onDelete(c.id)}
-                  title="Delete Customer"
-                >
-                  🗑️
-                </button>
-                <button
-                  className="btn btn-outline-success btn-sm flex-grow-1"
-                  onClick={() => navigate(`/orders/new/${c.id}`)}
-                  title="Create New Order"
-                >
-                  🧾
-                </button>
+                {isManager() && (
+                  <>
+                    <button
+                      className="btn btn-outline-info btn-sm flex-grow-1"
+                      onClick={() => onEdit(c)}
+                      title="Edit Customer"
+                    >
+                      ✏️ 
+                    </button>
+                    <button 
+                      className="btn btn-outline-secondary btn-sm flex-grow-1" 
+                      onClick={() => setHistoryCustomer(c)}
+                      title="Customer History"
+                    >
+                      📋
+                    </button>
+                    <button
+                      className="btn btn-outline-danger btn-sm flex-grow-1"
+                      onClick={() => onDelete(c.id)}
+                      title="Delete Customer"
+                    >
+                      🗑️
+                    </button>
+                    <button
+                      className="btn btn-outline-success btn-sm flex-grow-1"
+                      onClick={() => navigate(`/orders/new/${c.id}`)}
+                      title="Create New Order"
+                    >
+                      🧾
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

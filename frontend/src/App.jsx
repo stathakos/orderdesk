@@ -57,9 +57,9 @@ function NavBar() {
   const links = [
     { to: "/", label: "Customers" },
     { to: "/orders", label: "Orders", badge: pendingCount > 0 ? pendingCount : null },
-    { to: "/menu", label: "Menu" },
-    { to: "/scanner", label: "Scanner" },
     ...(isManager() ? [
+      { to: "/menu", label: "Menu" },
+      { to: "/scanner", label: "Scanner" },
       { to: "/delivery-workers", label: "Delivery Workers" },
       { to: "/shift-summary", label: "Shift Summary" }
     ] : []),

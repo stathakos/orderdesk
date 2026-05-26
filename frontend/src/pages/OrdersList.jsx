@@ -6,6 +6,7 @@ import usePrint from "../hooks/usePrint";
 import { getOrders, updateOrder, deleteOrder, getDeliveryWorkers, assignOrder, unassignOrder, closeShift, purgeOldOrders } from "../services/api";
 import { isAdmin } from "../services/authStore";
 import useWatermark from "../hooks/useWatermark";
+import { isManager, isDelivery } from "../services/authStore";
  
 const ORDER_TYPES = [
   { value: "", label: "All Types" },
@@ -498,9 +499,11 @@ export default function OrdersList() {
                           />
                         </div>
                         <div className="d-flex gap-1 mt-1">
-                          <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
-                            Edit
-                          </button>
+                          {isManager() && (
+                            <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
+                              Edit
+                            </button>
+                          )}
                           <div className="btn-group">
                             <button
                               className="btn btn-sm btn-outline-theme dropdown-toggle"
@@ -510,11 +513,13 @@ export default function OrdersList() {
                               🖨
                             </button>
                             <ul className="dropdown-menu dropdown-menu-end">
-                              <li>
-                                <button className="dropdown-item" onClick={() => printKitchen(order)}>
-                                  🍕 Kitchen Copy
-                                </button>
-                              </li>
+                              {!isDelivery() && (
+                                <li>
+                                  <button className="dropdown-item" onClick={() => printKitchen(order)}>
+                                    🍕 Kitchen Copy
+                                  </button>
+                                </li>
+                              )}
                               <li>
                                 <button className="dropdown-item" onClick={() => printDelivery(order)}>
                                   🛵 Delivery Copy
@@ -522,9 +527,11 @@ export default function OrdersList() {
                               </li>
                             </ul>
                           </div>
-                          <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
-                            Delete
-                          </button>
+                          {isManager() && (
+                            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -638,9 +645,11 @@ export default function OrdersList() {
                     >
                       {expandedId === order.id ? "Hide Items" : `Items (${order.items.length})`}
                     </button>
-                    <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
-                      Edit
-                    </button>
+                    {isManager() && (
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
+                        Edit
+                      </button>
+                    )}
                     <div className="btn-group">
                       <button
                         className="btn btn-sm btn-outline-theme dropdown-toggle"
@@ -650,11 +659,13 @@ export default function OrdersList() {
                         🖨
                       </button>
                       <ul className="dropdown-menu dropdown-menu-end">
-                        <li>
-                          <button className="dropdown-item" onClick={() => printKitchen(order)}>
-                            🍕 Kitchen Copy
-                          </button>
-                        </li>
+                        {!isDelivery() && (
+                          <li>
+                            <button className="dropdown-item" onClick={() => printKitchen(order)}>
+                              🍕 Kitchen Copy
+                            </button>
+                          </li>
+                        )}
                         <li>
                           <button className="dropdown-item" onClick={() => printDelivery(order)}>
                             🛵 Delivery Copy
@@ -662,9 +673,11 @@ export default function OrdersList() {
                         </li>
                       </ul>
                     </div>
-                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
-                      Delete
-                    </button>
+                    {isManager() && (
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
+                        Delete
+                      </button>
+                    )}
                   </div>
  
                   {/* Expandable items */}

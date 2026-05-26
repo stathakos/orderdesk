@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from .. import models, schemas, database
+from ..dependencies import get_current_user, require_manager
 
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
@@ -24,6 +25,7 @@ def read_customers(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
+    _: models.User = Depends(get_current_user),
 ):
     return db.query(models.Customer).offset(skip).limit(limit).all()
 
@@ -32,6 +34,7 @@ def read_customers(
 def create_customer(
     customer: schemas.CustomerCreate,
     db: Session = Depends(get_db),
+    _: models.User = Depends(require_manager),
 ):
     print("Received customer:", customer)
     db_customer = models.Customer(**customer.model_dump())
@@ -55,6 +58,7 @@ def update_customer(
     customer_id: int,
     customer_update: schemas.CustomerUpdate,
     db: Session = Depends(get_db),
+    _: models.User = Depends(require_manager),
 ):
     db_customer = (
         db.query(models.Customer).filter(models.Customer.id == customer_id).first()
@@ -79,7 +83,11 @@ def update_customer(
 
 
 @router.delete("/{customer_id}")
-def delete_customer(customer_id: int, db: Session = Depends(get_db)):
+def delete_customer(
+    customer_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_manager),
+):
     db_customer = (
         db.query(models.Customer).filter(models.Customer.id == customer_id).first()
     )
@@ -101,6 +109,7 @@ def search_customers(
     phone: str | None = None,
     name: str | None = None,
     db: Session = Depends(get_db),
+    _: models.User = Depends(get_current_user),
 ):
     query = db.query(models.Customer)
 
@@ -118,7 +127,11 @@ def search_customers(
 
 
 @router.get("/{customer_id}", response_model=schemas.CustomerResponse)
-def get_customer(customer_id: int, db: Session = Depends(get_db)):
+def get_customer(
+    customer_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(get_current_user),
+):
     db_customer = (
         db.query(models.Customer).filter(models.Customer.id == customer_id).first()
     )
