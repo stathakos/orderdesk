@@ -111,7 +111,7 @@ export default function CustomerOrderHistory({ customer, onClose }) {
 
         {/* Stats */}
         {!loading && !error && (
-          <div className="row g-0 border-bottom">
+          <div className="row g-0 border-bottom justify-content-center">
             <div className="col-4 text-center p-3 border-end">
               <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>{orders.length}</div>
               <div className="text-muted small">Total Orders</div>
@@ -153,7 +153,13 @@ export default function CustomerOrderHistory({ customer, onClose }) {
             <p className="text-muted text-center mt-4">No orders found for this customer.</p>
           )}
 
-          {!loading && !error && orders.map((order) => (
+          {!loading && !error && orders.length > 0 && (
+            <div className="text-center text-muted small mb-3">
+              Showing last {Math.min(orders.length, 5)} of {orders.length} orders  {/* replace orders with {historicalTotal}  */}
+            </div>
+          )}
+
+          {!loading && !error && orders.slice(0, 5).map((order) => (
             <div key={order.id} className="card mb-3 shadow-sm">
               <div className="card-body pb-2">
                 {/* Order header */}

@@ -127,10 +127,16 @@ export default function CustomerSearch() {
   }, [debouncedPhone, debouncedName]);
 
   async function handleShowAll() {
-    const data = await getAllCustomers();
-    setResults(data);
-    setHasSearched(true);
-    setShowAll(true);
+    if (showAll) {
+      setResults([]);
+      setHasSearched(false);
+      setShowAll(false);
+    } else {
+      const data = await getAllCustomers();
+      setResults(data);
+      setHasSearched(true);
+      setShowAll(true);
+    }
   }
 
   return (
@@ -245,11 +251,11 @@ export default function CustomerSearch() {
       <div className="row justify-content-center g-2 mb-3">
         <div className="col-12 col-sm-5 col-md-4">
           <button
-            className="btn btn-outline-secondary w-100"
+            className={`btn w-100 ${showAll ? "btn-secondary" : "btn-outline-secondary"}`}
             onClick={handleShowAll}
-            title="Show all customers"
+            title={showAll ? "Hide customers" : "Show all customers"}
           >
-            👥 Show All Customers
+            {showAll ? "👥 Hide Customers" : "👥 Show All Customers"}
           </button>
         </div>
       </div>
