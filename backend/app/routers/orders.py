@@ -251,6 +251,16 @@ def create_order(
         )
         db.add(db_item)
 
+    db.flush()
+
+    # Increment total_orders counter — never decreases even if orders are purged
+    db.query(models.Customer).filter(models.Customer.id == order.customer_id).update(
+        {
+            "total_orders": models.Customer.total_orders + 1,
+            "total_spent": models.Customer.total_spent + db_order.total,
+        }
+    )
+
     db.commit()
 
     return _load_order(int(db_order.id), db)
@@ -268,6 +278,11 @@ def update_order(
         raise HTTPException(status_code=404, detail="Order not found")
 
     update_data = order_update.model_dump(exclude_unset=True)
+    # If status is changing to delivered, increment customer's total_delivered
+    if update_data.get("status") == "delivered":
+        db.query(models.Customer).filter(
+            models.Customer.id == db_order.customer_id
+        ).update({"total_delivered": models.Customer.total_delivered + 1})
     for key, value in update_data.items():
         setattr(db_order, key, value)
 

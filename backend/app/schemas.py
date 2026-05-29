@@ -133,6 +133,9 @@ class CustomerInfo(BaseModel):
     address: str
     floor: Optional[str] = None
     notes: Optional[str] = None
+    total_orders: int = 0
+    total_spent: float = 0.0
+    total_delivered: int = 0
 
     model_config = {"from_attributes": True}
 
@@ -144,6 +147,9 @@ class CustomerResponse(BaseModel):
     address: str
     floor: Optional[str]
     notes: Optional[str]
+    total_orders: int = 0
+    total_spent: float = 0.0
+    total_delivered: int = 0
 
     model_config = {"from_attributes": True}
 

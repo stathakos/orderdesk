@@ -99,6 +99,9 @@ class Customer(Base):
     address = Column(String(255), nullable=True)
     floor = Column(String(50), nullable=True)
     notes = Column(String(255), nullable=True)
+    total_orders = Column(Integer, default=0, nullable=False)
+    total_spent = Column(Float, default=0.0, nullable=False)
+    total_delivered = Column(Integer, default=0, nullable=False)
 
     orders = relationship(
         "Order", back_populates="customer", foreign_keys="[Order.customer_id]"
