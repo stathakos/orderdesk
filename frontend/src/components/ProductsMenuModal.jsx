@@ -109,11 +109,11 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
       {/* Modal container */}
       <div onClick={(e) => e.stopPropagation()} style={{
         position: "fixed",
-        top: "3vh",
+        top: "1vh",
         left: "50%",
         transform: "translateX(-50%)",
         width: "min(1100px, 96vw)",
-        maxHeight: "94vh",
+        maxHeight: "98vh",
         backgroundColor: "var(--bs-body-bg)",
         borderRadius: "10px",
         zIndex: 10003,
@@ -131,7 +131,8 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
         }} className="flex-md-row flex-column">
 
           {/* LEFT / TOP: product grid */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "1rem" }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "1rem" }}
+            className="products-grid-mobile">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-2">
               <h5 className="mb-0">Select Product</h5>
@@ -251,8 +252,9 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                 }
                 @media (max-width: 767px) {
                   .sidebar-panel {
-                    max-height: 40vh;
+                    max-height: 55vh;
                     border-top: 1px solid #dee2e6;
+                    overflow-y: auto;
                   }
                 }
               `}</style>
@@ -309,7 +311,7 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                               <p className="fw-semibold small mb-1">
                                 Choose one: <span className="text-danger">*</span>
                               </p>
-                              <div style={{ overflowY: "auto" }}>
+                              <div style={{ overflowY: "auto", minHeight: "70px" }}>
                                 {singleItems.map((cust) => {
                                   const isSelected = checkedCustomizations.includes(cust.name);
                                   return (
@@ -353,7 +355,7 @@ export default function ProductsMenuModal({ onClose, onProductSelected }) {
                           {multiItems.length > 0 && (
                             <>
                               <p className="fw-semibold small mb-1 mt-2">Extras:</p>
-                              <div style={{ overflowY: "auto", flex: 1 }}>
+                              <div style={{ overflowY: "auto", flex: 1, minHeight: "65px" }}>
                                 {multiItems.map((cust) => {
                                   const checked = checkedCustomizations.includes(cust.name);
                                   return (
@@ -577,7 +579,7 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
         boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
       }}>
         {/* Header */}
-        <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
+        <div className="d-flex justify-content-between align-items-center p-3 pb-1 border-bottom">
           <div>
             <h5 className="mb-0 fw-bold">🍕 Make Your Own Pizza</h5>
             <small className="text-muted">First 3 ingredients included in base price</small>
@@ -587,7 +589,7 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
 
         {/* Size selector */}
         {sizes.length > 0 && (
-          <div className="px-3 pt-3 pb-2 border-bottom">
+          <div className="px-3 pt-2 pb-2 border-bottom">
             <label className="form-label small fw-semibold">Size</label>
             <div className="d-flex flex-wrap gap-2">
               {CUSTOM_PIZZA_SIZES.map((size) => (
@@ -613,7 +615,7 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
             </div>
             {/* Dynamic hint below buttons */}
             {selectedSize.threeIngExtra > 0 && (
-              <small className="text-muted mt-1 d-block">
+              <small className="text-muted mt-1 d-block" style={{ fontSize: "0.7rem" }}>
                 1 ingredient: <strong>{selectedSize.basePrice.toFixed(2)}€</strong> · 
                 2 ingredients: <strong>{(selectedSize.basePrice + selectedSize.twoIngExtra).toFixed(2)}€</strong> ·
                 3 ingredients: <strong>{(selectedSize.basePrice + selectedSize.twoIngExtra + selectedSize.threeIngExtra).toFixed(2)}€</strong>
@@ -623,41 +625,17 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
         )}
 
         {/* Base price - manual override */}
-        <div className="px-3 pt-3 pb-2 border-bottom">
-          <label className="form-label small fw-semibold">Base Price (€) 
-            <span className="text-muted fw-normal small ms-2">
-              — {
-              freeCount >= 3 
-                ? "3-ingredient price" 
-                : freeCount >= 2
-                  ? "2-ingredient price" 
-                  : "1-ingredient price"
-              }
+        <div className="px-3 py-2 border-bottom d-flex align-items-center gap-2">
+          <span className="small text-muted">
+            Base: <strong className="text-danger">{dynamicBase.toFixed(2)}€</strong>
+            <span className="ms-1" style={{ fontSize: "0.7rem" }}>
+              ({freeCount >= 3 ? "3-ing" : freeCount >= 2 ? "2-ing" : "1-ing"} price)
             </span>
-          </label>
-          {/* Dynamic price indicator for 2 or 3 ingredients */}
-          <div className="text-danger fw-bold mb-1" style={{ fontSize: "1.1rem" }}>
-            {dynamicBase.toFixed(2)} €
-            {freeCount >= 2 && ingExtra > 0 && (
-              <small className="text-muted ms-2" style={{ fontSize: "0.75rem" }}>
-                ({selectedSize.basePrice.toFixed(2)} + {ingExtra.toFixed(2)} surcharge)
-              </small>
-            )}
-          </div>
-          {/* Dynamic price indicator for 3-ing*/}
-          {/* <div className="text-danger fw-bold mb-1" style={{ fontSize: "1.1rem" }}>
-            {dynamicBase.toFixed(2)} €
-            {freeCount >= 3 && selectedSize.threeIngExtra > 0 && (
-              <small className="text-muted ms-2" style={{ fontSize: "0.75rem" }}>
-                ({selectedSize.basePrice.toFixed(2)} + {selectedSize.threeIngExtra.toFixed(2)} surcharge)
-              </small>
-            )}
-          </div> */}
-          <label className="form-label small text-muted mb-1">Override if needed:</label>
+          </span>
           <input
             type="number"
-            className="form-control form-control-sm"
-            style={{ maxWidth: 120 }}
+            className="form-control form-control-sm ms-auto"
+            style={{ maxWidth: 80 }}
             value={manualOverride ? overridePrice : dynamicBase.toFixed(2)}
             step="0.50"
             min="0"
@@ -666,6 +644,7 @@ function CustomPizzaModal({ ingredients, sizes, onClose, onConfirm }) {
               setOverridePrice(e.target.value);
             }}
           />
+          <span className="small text-muted">override</span>
         </div>
 
         {/* Ingredients grid */}

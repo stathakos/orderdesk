@@ -68,3 +68,10 @@ body::before {
   color: #212529 !important;
   border-color: #f8f9fa !important;
 }
+
+@media only screen and (max-width: 375px) {
+  .products-grid-mobile {
+    max-height: 45vh !important;
+    overflow-y: auto;
+  }
+}
