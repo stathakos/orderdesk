@@ -111,6 +111,7 @@ export default function OrdersList() {
   const [purgeResult, setPurgeResult] = useState(null);
   const [purging, setPurging] = useState(false);
 
+  const isToday = dateFrom === today && dateTo === today;
  
   async function fetchOrders() {
     setLoading(true);
@@ -124,7 +125,6 @@ export default function OrdersList() {
       if (dateFrom) filters.date_from = dateFrom;
       if (dateTo) filters.date_to = dateTo;
       // Auto-include archived when looking at anything other than today
-      const isToday = dateFrom === today && dateTo === today;
       if (!isToday) filters.include_archived = true;
       setOrders(await getOrders(filters));
     } catch {
@@ -133,6 +133,11 @@ export default function OrdersList() {
       setLoading(false);
     }
   }
+
+  // Only hide delivered orders when viewing today
+  const visibleOrders = isToday 
+    ? orders.filter(o => o.status !== "delivered")
+    : orders;
 
   async function fetchWorkers() {
     try {
@@ -298,7 +303,12 @@ export default function OrdersList() {
   };
  
   return (
-    <div className="container-fluid px-3 px-md-4 mt-3">
+    <div className="container-fluid px-3 px-md-4 mt-3" style={{ 
+      height: "calc(100vh - 80px)",  // 80px accounts for navbar height
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden"
+    }}>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">Orders</h4>
         <button
@@ -428,470 +438,482 @@ export default function OrdersList() {
       {error && <div className="alert alert-danger">{error}</div>}
       {!loading && orders.length === 0 && <p className="text-muted">No orders found.</p>}
  
-      {/* ── DESKTOP: table (hidden on mobile) ── */}
-      {!loading && orders.length > 0 && (
-        <>
-          <div className="d-none d-md-block">
-            <table className="table table-hover align-middle">
-              <thead className="table-light">
-                <tr>
-                  <th>Num #</th>
-                  <th>#</th>
-                  <th>Customer</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Payment</th>
-                  <th>Worker</th>
-                  <th>Total</th>
-                  <th>Created</th>
-                  <th>Items</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => (
-                  <React.Fragment key={order.id}>
-                    <tr>
-                      <td>
-                        <span className="badge bg-dark">
-                          #{order.daily_sequence ?? "—"}
-                        </span>
-                      </td>
-                      <td>{order.id}</td>
-                      <td>
-                        <div>{order.customer.name}</div>
-                        <small className="text-muted">{order.customer.phone}</small>
-                        {["delivery_us", "delivery_partner"].includes(order.order_type) && (
-                          <div>
-                            <small className="text-danger fw-semibold">
-                              📍 {order.customer.address || "No address on file"}
-                            </small>
-                          </div>
-                        )}
-                        <small className="text-muted">{order.customer.floor || "No floor on file"}</small>
-                      </td>
-                      <td>{ORDER_TYPES.find((t) => t.value === order.order_type)?.label ?? order.order_type}</td>
-                      <td>
-                        <select
-                          className={`form-select form-select-sm text-${STATUS_BADGE[order.status] ?? "secondary"}`}
-                          value={order.status}
-                          onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                          >
-                          {statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                        </select>
-                      </td>
-                      <td>{PAYMENT_METHODS.find((t) => t.value === order.payment_method)?.label ?? order.payment_method}</td>
-                      <td><WorkerSelect order={order} /></td>
-                      <td>{order.total.toFixed(2)} €</td>
-                      <td><small>{new Date(order.created_at).toLocaleString("el-GR")}</small></td>
-                      <td>
-                        <button className="btn btn-sm btn-outline-secondary"
-                          onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}>
-                          {expandedId === order.id ? "Hide" : `Show (${order.items.length})`}
-                        </button>
-                      </td>
-                      <td>
-                        <div className="text-center mb-1">
-                          <OrderTimer 
-                            createdAt={order.created_at} 
-                            status={order.status}
-                            assignedTo={order.assigned_to}
-                          />
-                        </div>
-                        <div className="d-flex gap-1 mt-1">
-                          {isManager() && (
-                            <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
-                              Edit
-                            </button>
+      {/* Hidden delivered orders notice */}
+      {!loading && orders.length !== visibleOrders.length && (
+        <small className="text-muted d-block mb-2">
+          ⚡ {orders.length - visibleOrders.length} delivered order(s) hidden from view
+        </small>
+      )}
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {/* ── DESKTOP: table (hidden on mobile) ── */}
+        {!loading && orders.length > 0 && (
+          <>
+            <div className="d-none d-md-block">
+              <table className="table table-hover align-middle">
+                <thead className="table-light" style={{ 
+                  position: "sticky", 
+                  top: 0, 
+                  zIndex: 1 
+                }}>
+                  <tr>
+                    <th>Num #</th>
+                    <th>#</th>
+                    <th>Customer</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Worker</th>
+                    <th>Total</th>
+                    <th>Created</th>
+                    <th>Items</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleOrders.map((order) => (
+                    <React.Fragment key={order.id}>
+                      <tr>
+                        <td>
+                          <span className="badge bg-dark">
+                            #{order.daily_sequence ?? "—"}
+                          </span>
+                        </td>
+                        <td>{order.id}</td>
+                        <td>
+                          <div>{order.customer.name}</div>
+                          <small className="text-muted">{order.customer.phone}</small>
+                          {["delivery_us", "delivery_partner"].includes(order.order_type) && (
+                            <div>
+                              <small className="text-danger fw-semibold">
+                                📍 {order.customer.address || "No address on file"}
+                              </small>
+                            </div>
                           )}
-                          <div className="btn-group">
-                            <button
-                              className="btn btn-sm btn-outline-theme dropdown-toggle"
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
+                          <small className="text-muted">{order.customer.floor || "No floor on file"}</small>
+                        </td>
+                        <td>{ORDER_TYPES.find((t) => t.value === order.order_type)?.label ?? order.order_type}</td>
+                        <td>
+                          <select
+                            className={`form-select form-select-sm text-${STATUS_BADGE[order.status] ?? "secondary"}`}
+                            value={order.status}
+                            onChange={(e) => handleStatusChange(order.id, e.target.value)}
                             >
-                              🖨
-                            </button>
-                            <ul className="dropdown-menu dropdown-menu-end">
-                              {!isDelivery() && (
+                            {statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                          </select>
+                        </td>
+                        <td>{PAYMENT_METHODS.find((t) => t.value === order.payment_method)?.label ?? order.payment_method}</td>
+                        <td><WorkerSelect order={order} /></td>
+                        <td>{order.total.toFixed(2)} €</td>
+                        <td><small>{new Date(order.created_at).toLocaleString("el-GR")}</small></td>
+                        <td>
+                          <button className="btn btn-sm btn-outline-secondary"
+                            onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}>
+                            {expandedId === order.id ? "Hide" : `Show (${order.items.length})`}
+                          </button>
+                        </td>
+                        <td>
+                          <div className="text-center mb-1">
+                            <OrderTimer 
+                              createdAt={order.created_at} 
+                              status={order.status}
+                              assignedTo={order.assigned_to}
+                            />
+                          </div>
+                          <div className="d-flex gap-1 mt-1">
+                            {isManager() && (
+                              <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
+                                Edit
+                              </button>
+                            )}
+                            <div className="btn-group">
+                              <button
+                                className="btn btn-sm btn-outline-theme dropdown-toggle"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                              >
+                                🖨
+                              </button>
+                              <ul className="dropdown-menu dropdown-menu-end">
+                                {!isDelivery() && (
+                                  <li>
+                                    <button className="dropdown-item" onClick={() => printKitchen(order)}>
+                                      🍕 Kitchen Copy
+                                    </button>
+                                  </li>
+                                )}
                                 <li>
-                                  <button className="dropdown-item" onClick={() => printKitchen(order)}>
-                                    🍕 Kitchen Copy
+                                  <button className="dropdown-item" onClick={() => printDelivery(order)}>
+                                    🛵 Delivery Copy
                                   </button>
                                 </li>
-                              )}
-                              <li>
-                                <button className="dropdown-item" onClick={() => printDelivery(order)}>
-                                  🛵 Delivery Copy
-                                </button>
-                              </li>
-                            </ul>
-                          </div>
-                          {isManager() && (
-                            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
-                              Delete
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                    {expandedId === order.id && (
-                      <tr className="table-secondary">
-                        <td colSpan={11}>
-                          <div className="px-2 py-1">
-                            {order.description && (
-                              <p className="mb-2 text-muted small"><strong>Note:</strong> {order.description}</p>
+                              </ul>
+                            </div>
+                            {isManager() && (
+                              <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
+                                Delete
+                              </button>
                             )}
-                            <table className="table table-sm mb-0">
-                              <thead>
-                                <tr>
-                                  <th>Product</th><th>Qty</th><th>Unit</th><th>Subtotal</th><th>Customizations</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {order.items.map((item) => (
-                                  <tr key={item.id}>
-                                    <td>{item.product_name}</td>
-                                    <td>{item.quantity}</td>
-                                    <td>{item.price.toFixed(2)} €</td>
-                                    <td>{(item.price * item.quantity).toFixed(2)} €</td>
-                                    <td>{item.customizations?.length > 0 ? item.customizations.join(", ") : <span className="text-muted">—</span>}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
                           </div>
                         </td>
                       </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
- 
-          {/* ── MOBILE: cards (hidden on desktop) ── */}
-          <div className="d-md-none">
-            {orders.map((order) => (
-              <div key={order.id} className="card mb-3 shadow-sm">
-                <div className="card-body pb-2">
-                  {/* Top row: order id + total */}
-                  <div className="d-flex justify-content-between align-items-center mb-1">
-                    <div className="d-flex align-items-center gap-2">
-                      <span className="badge bg-dark">#{order.daily_sequence ?? "—"}</span>
-                      <span className="fw-bold">Order #{order.id}</span>
+                      {expandedId === order.id && (
+                        <tr className="table-secondary">
+                          <td colSpan={11}>
+                            <div className="px-2 py-1">
+                              {order.description && (
+                                <p className="mb-2 text-muted small"><strong>Note:</strong> {order.description}</p>
+                              )}
+                              <table className="table table-sm mb-0">
+                                <thead>
+                                  <tr>
+                                    <th>Product</th><th>Qty</th><th>Unit</th><th>Subtotal</th><th>Customizations</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {order.items.map((item) => (
+                                    <tr key={item.id}>
+                                      <td>{item.product_name}</td>
+                                      <td>{item.quantity}</td>
+                                      <td>{item.price.toFixed(2)} €</td>
+                                      <td>{(item.price * item.quantity).toFixed(2)} €</td>
+                                      <td>{item.customizations?.length > 0 ? item.customizations.join(", ") : <span className="text-muted">—</span>}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+  
+            {/* ── MOBILE: cards (hidden on desktop) ── */}
+            <div className="d-md-none">
+              {visibleOrders.map((order) => (
+                <div key={order.id} className="card mb-3 shadow-sm">
+                  <div className="card-body pb-2">
+                    {/* Top row: order id + total */}
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="badge bg-dark">#{order.daily_sequence ?? "—"}</span>
+                        <span className="fw-bold">Order #{order.id}</span>
+                      </div>
+                      <span className="fw-bold text-primary">{order.total.toFixed(2)} €</span>
                     </div>
-                    <span className="fw-bold text-primary">{order.total.toFixed(2)} €</span>
-                  </div>
- 
-                  {/* Customer */}
-                  <div className="mb-1">
-                    <span className="small text-muted">Customer: </span>
-                    <span className="small">{order.customer.name} · {order.customer.phone}</span>
-                  </div>
-                  {["delivery_us", "delivery_partner"].includes(order.order_type) && (
+  
+                    {/* Customer */}
                     <div className="mb-1">
-                      <small className="text-danger fw-semibold">
-                        📍 {order.customer.address || "No address on file"} · {order.customer.floor || "No floor on file"}
-                      </small>
+                      <span className="small text-muted">Customer: </span>
+                      <span className="small">{order.customer.name} · {order.customer.phone}</span>
                     </div>
-                  )}
- 
-                  {/* Type + date */}
-                  <div className="mb-2">
-                    <span className="badge bg-secondary me-2">
-                      {ORDER_TYPES.find((t) => t.value === order.order_type)?.label ?? order.order_type}
-                    </span>
-                    <span className="small text-muted">
-                      {new Date(order.created_at).toLocaleString("el-GR")}
-                    </span>
-                    <span className="badge bg-info ms-2">
-                      {PAYMENT_METHODS.find((t) => t.value === order.payment_method)?.label ?? order.payment_method}
-                    </span>
-                  </div>
- 
-                  {/* Status dropdown */}
-                  <div className="mb-2">
-                    <label className="form-label small fw-semibold mb-1">Status:</label>
-                    <select
-                      className={`form-select form-select-sm text-${STATUS_BADGE[order.status] ?? "secondary"}`}
-                      value={order.status}
-                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                    >
-                      {statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                    </select>
-                  </div>
-
-                  {/* Worker assignment */}
-                  {isDeliveryOrder(order) && (
-                    <div className="mb-2">
-                      <label className="form-label small fw-semibold mb-1">Delivery Worker:</label>
-                      <WorkerSelect order={order} />
-                    </div>
-                  )}
- 
-                  {/* Actions */}
-                  <div className="text-center mb-1">
-                    <OrderTimer 
-                      createdAt={order.created_at}
-                      status={order.status}
-                      assignedTo={order.assigned_to}
-                    />
-                  </div>
-                  <div className="d-flex gap-2 mt-1">
-                    <button
-                      className="btn btn-sm btn-outline-secondary flex-grow-1"
-                      onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
-                    >
-                      {expandedId === order.id ? "Hide Items" : `Items (${order.items.length})`}
-                    </button>
-                    {isManager() && (
-                      <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
-                        Edit
-                      </button>
+                    {["delivery_us", "delivery_partner"].includes(order.order_type) && (
+                      <div className="mb-1">
+                        <small className="text-danger fw-semibold">
+                          📍 {order.customer.address || "No address on file"} · {order.customer.floor || "No floor on file"}
+                        </small>
+                      </div>
                     )}
-                    <div className="btn-group">
-                      <button
-                        className="btn btn-sm btn-outline-theme dropdown-toggle"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
+  
+                    {/* Type + date */}
+                    <div className="mb-2">
+                      <span className="badge bg-secondary me-2">
+                        {ORDER_TYPES.find((t) => t.value === order.order_type)?.label ?? order.order_type}
+                      </span>
+                      <span className="small text-muted">
+                        {new Date(order.created_at).toLocaleString("el-GR")}
+                      </span>
+                      <span className="badge bg-info ms-2">
+                        {PAYMENT_METHODS.find((t) => t.value === order.payment_method)?.label ?? order.payment_method}
+                      </span>
+                    </div>
+  
+                    {/* Status dropdown */}
+                    <div className="mb-2">
+                      <label className="form-label small fw-semibold mb-1">Status:</label>
+                      <select
+                        className={`form-select form-select-sm text-${STATUS_BADGE[order.status] ?? "secondary"}`}
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
                       >
-                        🖨
+                        {statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                      </select>
+                    </div>
+
+                    {/* Worker assignment */}
+                    {isDeliveryOrder(order) && (
+                      <div className="mb-2">
+                        <label className="form-label small fw-semibold mb-1">Delivery Worker:</label>
+                        <WorkerSelect order={order} />
+                      </div>
+                    )}
+  
+                    {/* Actions */}
+                    <div className="text-center mb-1">
+                      <OrderTimer 
+                        createdAt={order.created_at}
+                        status={order.status}
+                        assignedTo={order.assigned_to}
+                      />
+                    </div>
+                    <div className="d-flex gap-2 mt-1">
+                      <button
+                        className="btn btn-sm btn-outline-secondary flex-grow-1"
+                        onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
+                      >
+                        {expandedId === order.id ? "Hide Items" : `Items (${order.items.length})`}
                       </button>
-                      <ul className="dropdown-menu dropdown-menu-end">
-                        {!isDelivery() && (
+                      {isManager() && (
+                        <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
+                          Edit
+                        </button>
+                      )}
+                      <div className="btn-group">
+                        <button
+                          className="btn btn-sm btn-outline-theme dropdown-toggle"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          🖨
+                        </button>
+                        <ul className="dropdown-menu dropdown-menu-end">
+                          {!isDelivery() && (
+                            <li>
+                              <button className="dropdown-item" onClick={() => printKitchen(order)}>
+                                🍕 Kitchen Copy
+                              </button>
+                            </li>
+                          )}
                           <li>
-                            <button className="dropdown-item" onClick={() => printKitchen(order)}>
-                              🍕 Kitchen Copy
+                            <button className="dropdown-item" onClick={() => printDelivery(order)}>
+                              🛵 Delivery Copy
                             </button>
                           </li>
-                        )}
-                        <li>
-                          <button className="dropdown-item" onClick={() => printDelivery(order)}>
-                            🛵 Delivery Copy
-                          </button>
-                        </li>
-                      </ul>
+                        </ul>
+                      </div>
+                      {isManager() && (
+                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
+                          Delete
+                        </button>
+                      )}
                     </div>
-                    {isManager() && (
-                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
-                        Delete
-                      </button>
+  
+                    {/* Expandable items */}
+                    {expandedId === order.id && (
+                      <div className="mt-2 pt-2 border-top">
+                        {order.description && (
+                          <p className="small text-muted mb-2"><strong>Note:</strong> {order.description}</p>
+                        )}
+                        {order.items.map((item) => (
+                          <div key={item.id} className="d-flex justify-content-between small mb-1">
+                            <span>
+                              {item.quantity}× {item.product_name}
+                              {item.customizations?.length > 0 && (
+                                <span className="text-muted"> ({item.customizations.join(", ")})</span>
+                              )}
+                            </span>
+                            <span className="text-muted">{(item.price * item.quantity).toFixed(2)} €</span>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
- 
-                  {/* Expandable items */}
-                  {expandedId === order.id && (
-                    <div className="mt-2 pt-2 border-top">
-                      {order.description && (
-                        <p className="small text-muted mb-2"><strong>Note:</strong> {order.description}</p>
-                      )}
-                      {order.items.map((item) => (
-                        <div key={item.id} className="d-flex justify-content-between small mb-1">
-                          <span>
-                            {item.quantity}× {item.product_name}
-                            {item.customizations?.length > 0 && (
-                              <span className="text-muted"> ({item.customizations.join(", ")})</span>
-                            )}
-                          </span>
-                          <span className="text-muted">{(item.price * item.quantity).toFixed(2)} €</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-      {/* Edit Order Modal */}
-      {editingOrder && (
-        <EditOrderModal
-          order={editingOrder}
-          onClose={() => setEditingOrder(null)}
-          onSaved={handleOrderSaved}
-        />
-      )}
-      {/* Kitchen Ticket — hidden on screen, shown only on print */}
-      <KitchenTicket order={orderToPrint} variant={printVariant} />
-      {assignModalOrder && (
-        <AssignWorkerModal
-          order={assignModalOrder}
-          workers={workers}
-          onConfirm={(workerId) => handleAssignAndReady(assignModalOrder, workerId)}
-          onSkip={() => setAssignModalOrder(null)}
-          required={assignModalOrder.pendingStatus === "delivered"}
-        />
-      )}
-      {/* Close Shift Modal */}
-      {showCloseShift && (
-        <>
-          <div
-            style={{
-              position: "fixed", inset: 0,
-              backgroundColor: "rgba(0,0,0,0.55)",
-              zIndex: 10000,
-            }}
-            onClick={() => { if (!closingShift) setShowCloseShift(false); }}
+              ))}
+            </div>
+          </>
+        )}
+        {/* Edit Order Modal */}
+        {editingOrder && (
+          <EditOrderModal
+            order={editingOrder}
+            onClose={() => setEditingOrder(null)}
+            onSaved={handleOrderSaved}
           />
-          <div style={{
-            position: "fixed",
-            top: "50%", left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "min(440px, 95vw)",
-            backgroundColor: "var(--bs-body-bg)",
-            borderRadius: "10px",
-            zIndex: 10001,
-            padding: "clamp(1.25rem, 4vw, 2rem)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
-          }}>
-            {closeShiftResult ? (
-              // Success state
-              <>
-                <div className="text-center mb-4">
-                  <div style={{ fontSize: "2.5rem" }}>✅</div>
-                  <h5 className="fw-bold mt-2">Shift Closed!</h5>
-                </div>
-                <div className="card mb-4">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted">Orders archived:</span>
-                      <span className="fw-bold">{closeShiftResult.orders_archived}</span>
-                    </div>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted">Total revenue:</span>
-                      <span className="fw-bold">{closeShiftResult.total_revenue.toFixed(2)} €</span>
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <span className="text-muted">Cash collected:</span>
-                      <span className="fw-bold text-success">{closeShiftResult.cash_revenue.toFixed(2)} €</span>
+        )}
+        {/* Kitchen Ticket — hidden on screen, shown only on print */}
+        <KitchenTicket order={orderToPrint} variant={printVariant} />
+        {assignModalOrder && (
+          <AssignWorkerModal
+            order={assignModalOrder}
+            workers={workers}
+            onConfirm={(workerId) => handleAssignAndReady(assignModalOrder, workerId)}
+            onSkip={() => setAssignModalOrder(null)}
+            required={assignModalOrder.pendingStatus === "delivered"}
+          />
+        )}
+        {/* Close Shift Modal */}
+        {showCloseShift && (
+          <>
+            <div
+              style={{
+                position: "fixed", inset: 0,
+                backgroundColor: "rgba(0,0,0,0.55)",
+                zIndex: 10000,
+              }}
+              onClick={() => { if (!closingShift) setShowCloseShift(false); }}
+            />
+            <div style={{
+              position: "fixed",
+              top: "50%", left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "min(440px, 95vw)",
+              backgroundColor: "var(--bs-body-bg)",
+              borderRadius: "10px",
+              zIndex: 10001,
+              padding: "clamp(1.25rem, 4vw, 2rem)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
+            }}>
+              {closeShiftResult ? (
+                // Success state
+                <>
+                  <div className="text-center mb-4">
+                    <div style={{ fontSize: "2.5rem" }}>✅</div>
+                    <h5 className="fw-bold mt-2">Shift Closed!</h5>
+                  </div>
+                  <div className="card mb-4">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between mb-2">
+                        <span className="text-muted">Orders archived:</span>
+                        <span className="fw-bold">{closeShiftResult.orders_archived}</span>
+                      </div>
+                      <div className="d-flex justify-content-between mb-2">
+                        <span className="text-muted">Total revenue:</span>
+                        <span className="fw-bold">{closeShiftResult.total_revenue.toFixed(2)} €</span>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <span className="text-muted">Cash collected:</span>
+                        <span className="fw-bold text-success">{closeShiftResult.cash_revenue.toFixed(2)} €</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <button
-                  className="btn btn-theme w-100"
-                  onClick={() => {
-                    setShowCloseShift(false);
-                    setCloseShiftResult(null);
-                  }}
-                >
-                  Done
-                </button>
-              </>
-            ) : (
-              // Confirmation state
-              <>
-                <div className="text-center mb-4">
-                  <div style={{ fontSize: "2.5rem" }}>🔒</div>
-                  <h5 className="fw-bold mt-2">Close Shift?</h5>
-                  <p className="text-muted small mt-2">
-                    All of today's orders will be archived and hidden from the active view.
-                    They remain in the database and can be accessed via the date filters.
-                  </p>
-                </div>
-                <div className="d-flex gap-2">
                   <button
-                    className="btn btn-danger flex-grow-1"
-                    onClick={handleCloseShift}
-                    disabled={closingShift}
+                    className="btn btn-theme w-100"
+                    onClick={() => {
+                      setShowCloseShift(false);
+                      setCloseShiftResult(null);
+                    }}
                   >
-                    {closingShift ? (
-                      <><span className="spinner-border spinner-border-sm me-2" />Closing...</>
-                    ) : "Yes, Close Shift"}
+                    Done
                   </button>
-                  <button
-                    className="btn btn-outline-secondary flex-grow-1"
-                    onClick={() => setShowCloseShift(false)}
-                    disabled={closingShift}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </>
-      )}
-      {/* Purge Old Orders Modal */}
-      {showPurge && (
-        <>
-          <div
-            style={{
-              position: "fixed", inset: 0,
-              backgroundColor: "rgba(0,0,0,0.55)",
-              zIndex: 10000,
-            }}
-            onClick={() => { if (!purging) setShowPurge(false); }}
-          />
-          <div style={{
-            position: "fixed",
-            top: "50%", left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "min(440px, 95vw)",
-            backgroundColor: "var(--bs-body-bg)",
-            borderRadius: "10px",
-            zIndex: 10001,
-            padding: "clamp(1.25rem, 4vw, 2rem)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
-          }}>
-            {purgeResult ? (
-              <>
-                <div className="text-center mb-4">
-                  <div style={{ fontSize: "2.5rem" }}>🗑</div>
-                  <h5 className="fw-bold mt-2">Purge Complete!</h5>
-                </div>
-                <div className="card mb-4">
-                  <div className="card-body text-center">
-                    <div style={{ fontSize: "2rem", fontWeight: 900 }}>
-                      {purgeResult.orders_deleted}
-                    </div>
-                    <div className="text-muted small">orders permanently deleted</div>
+                </>
+              ) : (
+                // Confirmation state
+                <>
+                  <div className="text-center mb-4">
+                    <div style={{ fontSize: "2.5rem" }}>🔒</div>
+                    <h5 className="fw-bold mt-2">Close Shift?</h5>
+                    <p className="text-muted small mt-2">
+                      All of today's orders will be archived and hidden from the active view.
+                      They remain in the database and can be accessed via the date filters.
+                    </p>
                   </div>
-                </div>
-                <button
-                  className="btn btn-theme w-100"
-                  onClick={() => {
-                    setShowPurge(false);
-                    setPurgeResult(null);
-                  }}
-                >
-                  Done
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="text-center mb-4">
-                  <div style={{ fontSize: "2.5rem" }}>⚠️</div>
-                  <h5 className="fw-bold mt-2">Purge Old Orders?</h5>
-                  <p className="text-muted small mt-2">
-                    This will <strong>permanently delete</strong> all archived orders
-                    older than 30 days. This action cannot be undone.
-                  </p>
-                </div>
-                <div className="d-flex gap-2">
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-danger flex-grow-1"
+                      onClick={handleCloseShift}
+                      disabled={closingShift}
+                    >
+                      {closingShift ? (
+                        <><span className="spinner-border spinner-border-sm me-2" />Closing...</>
+                      ) : "Yes, Close Shift"}
+                    </button>
+                    <button
+                      className="btn btn-outline-secondary flex-grow-1"
+                      onClick={() => setShowCloseShift(false)}
+                      disabled={closingShift}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        )}
+        {/* Purge Old Orders Modal */}
+        {showPurge && (
+          <>
+            <div
+              style={{
+                position: "fixed", inset: 0,
+                backgroundColor: "rgba(0,0,0,0.55)",
+                zIndex: 10000,
+              }}
+              onClick={() => { if (!purging) setShowPurge(false); }}
+            />
+            <div style={{
+              position: "fixed",
+              top: "50%", left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "min(440px, 95vw)",
+              backgroundColor: "var(--bs-body-bg)",
+              borderRadius: "10px",
+              zIndex: 10001,
+              padding: "clamp(1.25rem, 4vw, 2rem)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
+            }}>
+              {purgeResult ? (
+                <>
+                  <div className="text-center mb-4">
+                    <div style={{ fontSize: "2.5rem" }}>🗑</div>
+                    <h5 className="fw-bold mt-2">Purge Complete!</h5>
+                  </div>
+                  <div className="card mb-4">
+                    <div className="card-body text-center">
+                      <div style={{ fontSize: "2rem", fontWeight: 900 }}>
+                        {purgeResult.orders_deleted}
+                      </div>
+                      <div className="text-muted small">orders permanently deleted</div>
+                    </div>
+                  </div>
                   <button
-                    className="btn btn-danger flex-grow-1"
-                    onClick={handlePurge}
-                    disabled={purging}
+                    className="btn btn-theme w-100"
+                    onClick={() => {
+                      setShowPurge(false);
+                      setPurgeResult(null);
+                    }}
                   >
-                    {purging ? (
-                      <><span className="spinner-border spinner-border-sm me-2" />Purging...</>
-                    ) : "Yes, Purge Orders"}
+                    Done
                   </button>
-                  <button
-                    className="btn btn-outline-secondary flex-grow-1"
-                    onClick={() => setShowPurge(false)}
-                    disabled={purging}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </>
-      )}
+                </>
+              ) : (
+                <>
+                  <div className="text-center mb-4">
+                    <div style={{ fontSize: "2.5rem" }}>⚠️</div>
+                    <h5 className="fw-bold mt-2">Purge Old Orders?</h5>
+                    <p className="text-muted small mt-2">
+                      This will <strong>permanently delete</strong> all archived orders
+                      older than 30 days. This action cannot be undone.
+                    </p>
+                  </div>
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-danger flex-grow-1"
+                      onClick={handlePurge}
+                      disabled={purging}
+                    >
+                      {purging ? (
+                        <><span className="spinner-border spinner-border-sm me-2" />Purging...</>
+                      ) : "Yes, Purge Orders"}
+                    </button>
+                    <button
+                      className="btn btn-outline-secondary flex-grow-1"
+                      onClick={() => setShowPurge(false)}
+                      disabled={purging}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
