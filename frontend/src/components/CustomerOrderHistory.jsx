@@ -48,8 +48,19 @@ export default function CustomerOrderHistory({ customer, onClose }) {
   }, [customer.id]);
 
   const totalSpent = orders
-    .filter((o) => o.status === "delivered")
     .reduce((sum, o) => sum + o.total, 0);
+
+  const historicalTotal = customer.total_orders != null
+    ? customer.total_orders
+    : orders.length;
+
+  const historicalSpent = customer.total_spent != null && customer.total_spent > 0
+    ? customer.total_spent
+    : totalSpent;  // fallback to calculated if not set
+
+  const avgOrder = historicalTotal > 0
+    ? (historicalSpent / historicalTotal).toFixed(2)
+    : "0.00";
 
   return (
     <>
@@ -93,11 +104,11 @@ export default function CustomerOrderHistory({ customer, onClose }) {
         {/* Loyalty badge */}
         {!loading && !error && (
           <div className="text-center py-2 border-bottom">
-            {orders.length >= 50 ? (
+            {historicalTotal >= 50 ? (
               <span className="badge fs-6 px-3 py-2" style={{ backgroundColor: "#f59e0b" }}>
                 🥇 VIP Customer
               </span>
-            ) : orders.length >= 20 ? (
+            ) : historicalTotal >= 20 ? (
               <span className="badge fs-6 px-3 py-2 bg-secondary">
                 🥈 Regular Customer
               </span>
@@ -113,24 +124,34 @@ export default function CustomerOrderHistory({ customer, onClose }) {
         {!loading && !error && (
           <div className="row g-0 border-bottom justify-content-center">
             <div className="col-4 text-center p-3 border-end">
-              <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>{orders.length}</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>{historicalTotal}</div>
               <div className="text-muted small">Total Orders</div>
+              {historicalTotal > orders.length && (
+                <div style={{ fontSize: "0.7rem", color: "rgba(128,128,128,0.7)" }}>
+                  ({orders.length} in records)
+                </div>
+              )}
             </div>
             <div className="col-4 text-center p-3 border-end">
               <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>
-                {orders.filter((o) => o.status === "delivered").length}
+                {customer.total_delivered ?? orders.filter((o) => o.status === "delivered").length}
               </div>
               <div className="text-muted small">Delivered</div>
+              {customer.total_delivered > orders.filter((o) => o.status === "delivered").length && (
+                <div style={{ fontSize: "0.7rem", color: "rgba(128,128,128,0.7)" }}>
+                  ({orders.filter((o) => o.status === "delivered").length} in records)
+                </div>
+              )}
             </div>
             <div className="col-4 text-center p-3">
               <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#22c55e" }}>
-                {totalSpent.toFixed(2)}€
+                {historicalSpent.toFixed(2)}€
               </div>
               <div className="text-muted small">Total Spent</div>
             </div>
             <div className="col-3 text-center p-3">
               <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#3b82f6" }}>
-                {orders.length > 0 ? (totalSpent / orders.filter(o => o.status === "delivered").length || 0).toFixed(2) : "0.00"}€
+                {avgOrder}€
               </div>
               <div className="text-muted small">Avg Order</div>
             </div>
