@@ -186,9 +186,9 @@ export default function CustomerOrderHistory({ customer, onClose }) {
                 {/* Order header */}
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <div className="d-flex align-items-center gap-2">
-                    {order.daily_sequence && (
+                    {/* {order.daily_sequence && (
                       <span className="badge bg-dark">#{order.daily_sequence}</span>
-                    )}
+                    )} */}
                     <span className="fw-bold">Order #{order.id}</span>
                     <span className={`badge bg-${STATUS_BADGE[order.status] ?? "secondary"}`}>
                       {order.status.replace("_", " ")}

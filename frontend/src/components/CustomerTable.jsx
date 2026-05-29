@@ -96,6 +96,7 @@ export default function CustomerTable({ customers, onEdit, hasSearched, onDelete
                       title="Edit Customer"
                     >
                       ✏️ 
+                    <div style={{ fontSize: "0.6rem" }}>Edit</div>
                     </button>
                     <button 
                       className="btn btn-outline-secondary btn-sm flex-grow-1" 
@@ -103,6 +104,7 @@ export default function CustomerTable({ customers, onEdit, hasSearched, onDelete
                       title="Customer History"
                     >
                       📋
+                    <div style={{ fontSize: "0.6rem" }}>History</div>
                     </button>
                     <button
                       className="btn btn-outline-danger btn-sm flex-grow-1"
@@ -110,6 +112,7 @@ export default function CustomerTable({ customers, onEdit, hasSearched, onDelete
                       title="Delete Customer"
                     >
                       🗑️
+                    <div style={{ fontSize: "0.6rem" }}>Delete</div>
                     </button>
                     <button
                       className="btn btn-outline-success btn-sm flex-grow-1"
@@ -117,6 +120,7 @@ export default function CustomerTable({ customers, onEdit, hasSearched, onDelete
                       title="Create New Order"
                     >
                       🧾
+                    <div style={{ fontSize: "0.6rem" }}>Order</div>
                     </button>
                   </>
                 )}
