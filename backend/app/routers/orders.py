@@ -251,16 +251,6 @@ def create_order(
         )
         db.add(db_item)
 
-    db.flush()
-
-    # Increment total_orders counter — never decreases even if orders are purged
-    db.query(models.Customer).filter(models.Customer.id == order.customer_id).update(
-        {
-            "total_orders": models.Customer.total_orders + 1,
-            "total_spent": models.Customer.total_spent + db_order.total,
-        }
-    )
-
     db.commit()
 
     return _load_order(int(db_order.id), db)
@@ -278,11 +268,22 @@ def update_order(
         raise HTTPException(status_code=404, detail="Order not found")
 
     update_data = order_update.model_dump(exclude_unset=True)
-    # If status is changing to delivered, increment customer's total_delivered
-    if update_data.get("status") == "delivered":
+    # Increment customer counters when order is delivered
+    # Counters are stored on the Customer model so they survive
+    # order archiving and purging — historical data is preserved
+    if (
+        update_data.get("status") == "delivered"
+        and db_order.status != models.OrderStatus.delivered
+    ):
         db.query(models.Customer).filter(
             models.Customer.id == db_order.customer_id
-        ).update({"total_delivered": models.Customer.total_delivered + 1})
+        ).update(
+            {
+                "total_orders": models.Customer.total_orders + 1,
+                "total_spent": models.Customer.total_spent + db_order.total,
+                "total_delivered": models.Customer.total_delivered + 1,
+            }
+        )
     for key, value in update_data.items():
         setattr(db_order, key, value)
 
@@ -299,6 +300,13 @@ def delete_order(
     db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not db_order:
         raise HTTPException(status_code=404, detail="Order not found")
+
+    # Prevent deletion of delivered orders
+    if db_order.status == models.OrderStatus.delivered:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete a delivered order — use Close Shift to archive",
+        )
     db.delete(db_order)  # cascade deletes order items automatically
     db.commit()
 

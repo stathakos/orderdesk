@@ -520,7 +520,7 @@ export default function OrdersList() {
                             />
                           </div>
                           <div className="d-flex gap-1 mt-1">
-                            {isManager() && (
+                            {isManager() && order.status !== "delivered" && (
                               <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
                                 Edit
                               </button>
@@ -548,7 +548,7 @@ export default function OrdersList() {
                                 </li>
                               </ul>
                             </div>
-                            {isManager() && (
+                            {isManager() && order.status !== "delivered" && (
                               <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
                                 Delete
                               </button>
@@ -666,7 +666,7 @@ export default function OrdersList() {
                       >
                         {expandedId === order.id ? "Hide Items" : `Items (${order.items.length})`}
                       </button>
-                      {isManager() && (
+                      {isManager() && order.status !== "delivered" && (
                         <button className="btn btn-sm btn-outline-primary" onClick={() => setEditingOrder(order)}>
                           Edit
                         </button>
@@ -694,7 +694,7 @@ export default function OrdersList() {
                           </li>
                         </ul>
                       </div>
-                      {isManager() && (
+                      {isManager() && order.status !== "delivered" && (
                         <button className="btn btn-sm btn-danger" onClick={() => handleDelete(order.id)}>
                           Delete
                         </button>
