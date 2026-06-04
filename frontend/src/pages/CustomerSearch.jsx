@@ -20,6 +20,7 @@ export default function CustomerSearch() {
   const [stats, setStats] = useState({
     pending: 0,
     inProgress: 0,
+    ready: 0,
     delivered: 0,
     revenue: 0,
     unavailable: 0,
@@ -35,9 +36,10 @@ export default function CustomerSearch() {
     async function fetchStats() {
       try {
         const today = new Date().toISOString().split("T")[0];
-        const [pending, inProgress, delivered, allProducts] = await Promise.all([
+        const [pending, inProgress, ready, delivered, allProducts] = await Promise.all([
           getOrders({ status: "pending", date_from: today, date_to: today }),
           getOrders({ status: "in_progress", date_from: today, date_to: today }),
+          getOrders({ status: "ready", date_from: today, date_to: today }),
           getOrders({ status: "delivered", date_from: today, date_to: today }),
           getProducts(),
         ]);
@@ -46,6 +48,7 @@ export default function CustomerSearch() {
         setStats({
           pending: pending.length,
           inProgress: inProgress.length,
+          ready: ready.length,
           delivered: delivered.length,
           revenue,
           unavailable,
@@ -161,6 +164,11 @@ export default function CustomerSearch() {
                 {stats.inProgress}
               </div>
               <div className="text-muted small">In Progress</div>
+              {stats.ready > 0 && (
+                <div style={{ fontSize: "0.7rem", color: "#22c55e" }}>
+                  ✅ {stats.ready} waiting for delivery
+                </div>
+              )}
             </div>
           </div>
         </div>

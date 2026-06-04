@@ -126,6 +126,26 @@ export default function CustomerOrderHistory({ customer, onClose }) {
             <div className="col-4 text-center p-3 border-end">
               <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>{historicalTotal}</div>
               <div className="text-muted small">Total Orders</div>
+              {(() => {
+                const preparingCount = orders.filter(o => 
+                  o.status === "pending" || o.status === "in_progress"
+                ).length;
+                const readyCount = orders.filter(o => o.status === "ready").length;
+                return (
+                  <>
+                    {preparingCount > 0 && (
+                      <div style={{ fontSize: "0.7rem", color: "#f59e0b" }}>
+                        ⏳ {preparingCount} being prepared
+                      </div>
+                    )}
+                    {readyCount > 0 && (
+                      <div style={{ fontSize: "0.7rem", color: "#22c55e" }}>
+                        ✅ {readyCount} waiting for delivery
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
               {historicalTotal > orders.length && (
                 <div style={{ fontSize: "0.7rem", color: "rgba(128,128,128,0.7)" }}>
                   ({orders.length} in records)

@@ -251,6 +251,11 @@ def create_order(
         )
         db.add(db_item)
 
+    # Increment total_orders on create (pending + delivered, excludes cancelled)
+    db.query(models.Customer).filter(models.Customer.id == order.customer_id).update(
+        {"total_orders": models.Customer.total_orders + 1}
+    )
+
     db.commit()
 
     return _load_order(int(db_order.id), db)
@@ -279,11 +284,24 @@ def update_order(
             models.Customer.id == db_order.customer_id
         ).update(
             {
-                "total_orders": models.Customer.total_orders + 1,
                 "total_spent": models.Customer.total_spent + db_order.total,
                 "total_delivered": models.Customer.total_delivered + 1,
             }
         )
+
+    # If cancelled — decrement total_orders
+    if (
+        update_data.get("status") == "cancelled"
+        and db_order.status != models.OrderStatus.cancelled
+    ):
+        db.query(models.Customer).filter(
+            models.Customer.id == db_order.customer_id
+        ).update(
+            {
+                "total_orders": models.Customer.total_orders - 1,
+            }
+        )
+
     for key, value in update_data.items():
         setattr(db_order, key, value)
 
