@@ -328,12 +328,19 @@ export default function OrdersList() {
       </div>
  
       {/* Filters — stack on mobile, row on desktop */}
-      <div className="row g-2 mb-4">
-        <div className="col-6 col-md-2">
-          <select className="form-select form-select-sm" value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}>
-            {ORDER_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-          </select>
+      <div className="row g-2 mb-4 justify-content-center">
+        <div className="col-12">
+          <div className="d-flex flex-wrap gap-2 justify-content-center">
+            {ORDER_TYPES.map((t) => (
+              <button
+                key={t.value}
+                className={`btn btn-sm ${filterType === t.value ? "btn-theme" : "btn-outline-theme"}`}
+                onClick={() => setFilterType(t.value)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="col-6 col-md-2">
           <select className="form-select form-select-sm" value={filterPaymentMethod}
@@ -352,20 +359,6 @@ export default function OrdersList() {
             placeholder="Customer Name" value={filterCustomerName}
             onChange={(e) => setFilterCustomerName(e.target.value)} />
         </div>
-        <div className="col-6 col-md-auto d-flex align-items-center gap-2">
-          <div className="form-check mb-0">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="includeArchived"
-              checked={includeArchived}
-              onChange={(e) => setIncludeArchived(e.target.checked)}
-            />
-            <label className="form-check-label small" htmlFor="includeArchived">
-              Include archived
-            </label>
-          </div>
-        </div>
         <div className="col-6 col-md-3">
           <button className="btn btn-outline-secondary btn-sm w-100"
             onClick={() => { 
@@ -383,7 +376,7 @@ export default function OrdersList() {
       </div>
 
       {/* Date filters */}
-      <div className="row g-2 mb-4 align-items-center">
+      <div className="row g-2 mb-4 align-items-center justify-content-center">
         {/* Quick buttons */}
         <div className="col-12 col-md-auto">
           <div className="btn-group btn-group-sm">
@@ -431,6 +424,20 @@ export default function OrdersList() {
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
           />
+        </div>
+        <div className="col-6 col-md-auto d-flex align-items-center gap-2">
+          <div className="form-check mb-0">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="includeArchived"
+              checked={includeArchived}
+              onChange={(e) => setIncludeArchived(e.target.checked)}
+            />
+            <label className="form-check-label small" htmlFor="includeArchived">
+              Include archived
+            </label>
+          </div>
         </div>
       </div>
  
