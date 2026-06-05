@@ -20,7 +20,8 @@ export default function CustomerSearch() {
   const [stats, setStats] = useState({
     pending: 0,
     inProgress: 0,
-    ready: 0,
+    readyAssigned: 0,
+    readyUnassigned: 0,
     delivered: 0,
     revenue: 0,
     unavailable: 0,
@@ -43,12 +44,16 @@ export default function CustomerSearch() {
           getOrders({ status: "delivered", date_from: today, date_to: today }),
           getProducts(),
         ]);
+
+        const readyAssigned = ready.filter(o => o.assigned_to);
+        const readyUnassigned = ready.filter(o => !o.assigned_to);
         const revenue = delivered.reduce((sum, o) => sum + o.total, 0);
         const unavailable = allProducts.filter((p) => !p.is_available).length;
         setStats({
           pending: pending.length,
           inProgress: inProgress.length,
-          ready: ready.length,
+          readyAssigned: readyAssigned.length,
+          readyUnassigned: readyUnassigned.length,
           delivered: delivered.length,
           revenue,
           unavailable,
@@ -146,77 +151,92 @@ export default function CustomerSearch() {
     <div className="container-fluid px-3 px-md-4 my-4">
 
       {/* ── Today's stats bar ── */}
-      <div className="row g-3 mb-4">
-        <div className="col-6 col-md-3">
-          <div className="card text-center border-warning h-100">
-            <div className="card-body py-3">
-              <div style={{ fontSize: "1.8rem", fontWeight: 900, color: "#f59e0b" }}>
-                {stats.pending}
-              </div>
-              <div className="text-muted small">Pending</div>
-            </div>
-          </div>
-        </div>
-        <div className="col-6 col-md-3">
-          <div className="card text-center border-primary h-100">
-            <div className="card-body py-3">
-              <div style={{ fontSize: "1.8rem", fontWeight: 900, color: "#3b82f6" }}>
-                {stats.inProgress}
-              </div>
-              <div className="text-muted small">In Progress</div>
-              {stats.ready > 0 && (
-                <div style={{ fontSize: "0.7rem", color: "#22c55e" }}>
-                  ✅ {stats.ready} waiting for delivery
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="col-6 col-md-3">
-          <div className="card text-center border-success h-100">
-            <div className="card-body py-3">
-              <div style={{ fontSize: "1.8rem", fontWeight: 900, color: "#22c55e" }}>
-                {stats.delivered}
-              </div>
-              <div className="text-muted small">Delivered Today</div>
-            </div>
-          </div>
-        </div>
-        <div className="col-6 col-md-3">
-          <div className="card text-center border-secondary h-100">
-            <div className="card-body py-3">
-              <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>
-                {stats.revenue.toFixed(2)} €
-              </div>
-              <div className="text-muted small">Revenue Today</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Unavailable products alert */}
       <div className="row g-3 mb-4 justify-content-center">
-        <div className="col-6 col-md-3">
-          <div
-            className={`card text-center h-100 ${stats.unavailable > 0 ? "border-danger" : "border-success"}`}
-            style={{ cursor: stats.unavailable > 0 ? "pointer" : "default" }}
-            onClick={() => stats.unavailable > 0 && window.location.assign("/menu?tab=products")}
-            title={stats.unavailable > 0 ? "Click to go to Menu Manager" : "All products available"}
-          > Products Unavailable
-            <div className="card-body py-3">
-              <div style={{
-                fontSize: "1.8rem",
-                fontWeight: 900,
-                color: stats.unavailable > 0 ? "#ef4444" : "#22c55e"
-              }}>
-                {stats.unavailable}
+        <div className="row col-md-4">
+          <div className="col-6 col-md-12 mt-2">
+            <div className="card text-center border-warning h-100">
+              <div className="card-body py-3">
+                <div style={{ fontSize: "1.8rem", fontWeight: 900, color: "#f59e0b" }}>
+                  {stats.pending}
+                </div>
+                <div className="text-muted small">Pending</div>
               </div>
-              <div className="text-muted small">
-                {stats.unavailable > 0 ? "⚠️ Unavailable" : "✅ All Available"}
+            </div>
+          </div>
+          <div className="col-6 col-md-12 mt-2">
+            <div className="card text-center border-primary h-100">
+              <div className="card-body py-3">
+                <div style={{ fontSize: "1.8rem", fontWeight: 900, color: "#3b82f6" }}>
+                  {stats.inProgress}
+                </div>
+                <div className="text-muted small">In Progress</div>
+                {stats.readyUnassigned > 0 && (
+                  <div style={{ fontSize: "0.7rem", color: "#f59e0b" }}>
+                    ⏳ 🛵 {stats.readyUnassigned} waiting for delivery...
+                  </div>
+                )}
+                {stats.readyAssigned > 0 && (
+                  <div style={{ fontSize: "0.7rem", color: "#22c55e" }}>
+                    🛵 ✅ {stats.readyAssigned} on the way!
+                  </div>
+                )}
+                {/* {stats.ready > 0 && (
+                  <div style={{ fontSize: "0.7rem", color: "#22c55e" }}>
+                    ✅ {stats.ready} waiting for delivery
+                  </div>
+                )} */}
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Unavailable products alert */}
+        <div className="col-9 col-md-4 mb-2 d-flex align-items-center">
+          <div className="col-12">
+            <div
+              className={`card text-center h-100 ${stats.unavailable > 0 ? "border-danger" : "border-success"}`}
+              style={{ cursor: stats.unavailable > 0 ? "pointer" : "default" }}
+              onClick={() => stats.unavailable > 0 && window.location.assign("/menu?tab=products")}
+              title={stats.unavailable > 0 ? "Click to go to Menu Manager" : "All products available"}
+            > Products Unavailable
+              <div className="card-body py-3">
+                <div style={{
+                  fontSize: "1.8rem",
+                  fontWeight: 900,
+                  color: stats.unavailable > 0 ? "#ef4444" : "#22c55e"
+                }}>
+                  {stats.unavailable}
+                </div>
+                <div className="text-muted small">
+                  {stats.unavailable > 0 ? "⚠️ Unavailable" : "✅ All Available"}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="row col-md-4">
+          <div className="col-6 col-md-12 mt-2">
+            <div className="card text-center border-success h-100">
+              <div className="card-body py-3">
+                <div style={{ fontSize: "1.8rem", fontWeight: 900, color: "#22c55e" }}>
+                  {stats.delivered}
+                </div>
+                <div className="text-muted small">Delivered Today</div>
+              </div>
+            </div>
+          </div>
+          <div className="col-6 col-md-12 mt-2">
+            <div className="card text-center border-secondary h-100">
+              <div className="card-body py-3">
+                <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>
+                  {stats.revenue.toFixed(2)} €
+                </div>
+                <div className="text-muted small">Revenue Today</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
 
       <h4 className="mb-4 text-center">Search Customers</h4>
  
